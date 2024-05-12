@@ -1,7 +1,8 @@
+allowCrossOrigin: true
 # 设置代理
 proxy:
   # /*表示代理/下面所有接口，此处不区分/*或者/**
   servlet_url: /*
-  target_url: https://baidu.com
+  target_url: http://jetbrains.meethigher.top
 server:
   port: 8086
