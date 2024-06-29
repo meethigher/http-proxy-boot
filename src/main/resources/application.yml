@@ -1,14 +1,18 @@
+server:
+  port: 8080
 proxy:
   name: proxy
   # /* represents all interfaces below proxy /, no distinction between /* and /**
   servletUrl: /*
-  targetUrl: http://jetbrains.meethigher.top
+  targetUrl: http://10.0.0.1:4321
   log:
     enable: true
-    # Configure the agent’s log format. The options are remoteAddr、remotePort、userAgent、method、source、target
-    logFormat: "{remoteAddr} {remotePort} {userAgent} {method} uri: {source} -- {target}"
+    # configure the agent’s log format. the options are remoteAddr、remotePort、userAgent、method、source、target
+    logFormat: "{remoteAddr} {method} uri: {source} --> {target}"
   corsControl:
-    enable: true
+    # true means that the cors of all requests is managed by http-proxy-boot;
+    # false means that the cors of all requests is managed by the source service.
+    enable: false
+    # true means that the cors of all requests is allowed when enable=true
+    # false means that the cors of all requests is not allowed then enable=true
     allowCORS: false
-server:
-  port: 8086
