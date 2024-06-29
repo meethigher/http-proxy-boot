@@ -1,8 +1,14 @@
-allowCrossOrigin: true
-# 设置代理
 proxy:
-  # /*表示代理/下面所有接口，此处不区分/*或者/**
-  servlet_url: /*
-  target_url: http://jetbrains.meethigher.top
+  name: proxy
+  # /* represents all interfaces below proxy /, no distinction between /* and /**
+  servletUrl: /*
+  targetUrl: http://jetbrains.meethigher.top
+  log:
+    enable: true
+    # Configure the agent’s log format. The options are remoteAddr、remotePort、userAgent、method、source、target
+    logFormat: "{remoteAddr} {remotePort} {userAgent} {method} uri: {source} -- {target}"
+  corsControl:
+    enable: true
+    allowCORS: false
 server:
   port: 8086

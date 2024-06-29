@@ -3,11 +3,12 @@ package top.meethigher.proxy.config;
 
 import org.mitre.dsmiley.httpproxy.ProxyServlet;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import top.meethigher.proxy.utils.CorsProxyServlet;
 
+import javax.annotation.Resource;
 import javax.servlet.Servlet;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,33 +22,30 @@ import java.util.Map;
  */
 @Configuration
 public class ProxyServletConfiguration {
-    /**
-     * 读取配置文件中路由设置
-     */
-    @Value("${proxy.servlet_url}")
-    private String servlet_url;
-    /**
-     * 读取配置中代理目标地址
-     */
-    @Value("${proxy.target_url}")
-    private String target_url;
+
+
+    @Resource
+    private ProxyProperties proxyProperties;
+
 
     /**
      * 创建新的ProxyServlet
      */
     @Bean
     public Servlet proxyServlet() {
-        return new ProxyServlet();
+        return new CorsProxyServlet(proxyProperties.getCorsControl().isEnable(),
+                proxyProperties.getCorsControl().isAllowCORS(), proxyProperties.getLog().getLogFormat());
     }
 
     @Bean
-    public ServletRegistrationBean proxyServletRegistration(@Qualifier("proxyServlet") Servlet proxyServlet) {
-        ServletRegistrationBean registrationBean = new ServletRegistrationBean(proxyServlet, servlet_url);
+    public ServletRegistrationBean<ProxyServlet> proxyServletRegistration(@Qualifier("proxyServlet") Servlet proxyServlet) {
+        ServletRegistrationBean<ProxyServlet> registrationBean = new ServletRegistrationBean(proxyServlet, proxyProperties.getServletUrl());
         //设置网址以及参数
         Map<String, String> params = new HashMap<>();
-        params.put("targetUri", target_url);
-        params.put("log", "true");
+        params.put("targetUri", proxyProperties.getTargetUrl());
+        params.put("log", String.valueOf(proxyProperties.getLog().isEnable()));
         registrationBean.setInitParameters(params);
+        registrationBean.setName(proxyProperties.getName());
         return registrationBean;
     }
 
