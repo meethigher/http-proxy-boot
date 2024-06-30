@@ -15,4 +15,4 @@ proxy:
     enable: false
     # true means that the cors of all requests is allowed when enable=true
     # false means that the cors of all requests is not allowed then enable=true
-    allowCORS: false
+    allowCORS: true
