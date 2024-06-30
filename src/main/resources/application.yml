@@ -1,3 +1,7 @@
+logging:
+  config: classpath:log/logback.xml
+  file:
+    path: ./logs
 server:
   port: 8080
 proxy:

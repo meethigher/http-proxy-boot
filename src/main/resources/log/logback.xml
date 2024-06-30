@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="false">
+    <property resource="application.yml"/>
+    <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter"/>
+    <conversionRule conversionWord="wex"
+                    converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter"/>
+    <conversionRule conversionWord="wEx"
+                    converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter"/>
+    <springProperty scope="context" name="defaultPath" source="logging.file.path"/>
+    <springProperty scope="context" name="archiveEnable" source="logging.file.archive"/>
+    <property name="DEFAULT_PATH" value="${defaultPath}"/>
+    <property name="ARCHIVE_ENABLE" value="${archiveEnable}"/>
+
+    <appender name="ARCHIVE"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${DEFAULT_PATH}/latest.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${DEFAULT_PATH}/%d{yyyy-MM-dd,aux}/%d{yyyy-MM-dd-HH}.log</fileNamePattern>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${PID} --- [%15.15t]%-40.40logger{39}: %m%n%wEx</pattern>
+            <charset>utf-8</charset>
+        </encoder>
+    </appender>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <Target>System.out</Target>
+        <encoder>
+            <pattern>%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr(${PID}){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx</pattern>
+            <charset>utf-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 减少部分日志 -->
+    <!-- 业务日志 -->
+    <!-- 此处配置优先级高于root -->
+    <logger name="top.meethigher.snipurl.utils.GlobalDecorator" level="DEBUG"/>
+    <logger name="org.hibernate" level="WARN"/>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="ARCHIVE"/>
+    </root>
+</configuration>

@@ -36,6 +36,7 @@
             <artifactId>smiley-http-proxy-servlet</artifactId>
             <version>1.11</version>
         </dependency>
+
     </dependencies>
     <build>
         <finalName>${project.name}</finalName>
