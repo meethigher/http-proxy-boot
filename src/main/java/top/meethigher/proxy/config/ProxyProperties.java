@@ -3,6 +3,9 @@ package top.meethigher.proxy.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 /**
  * @author chenchuancheng
  * @since 2024/06/29 11:55
@@ -63,6 +66,18 @@ public class ProxyProperties {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Map<String, String> toMap() {
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put("proxy.name", getName());
+        map.put("proxy.servletUrl", getServletUrl());
+        map.put("proxy.targetUrl", getTargetUrl());
+        map.put("proxy.log.enable", String.valueOf(getLog().isEnable()));
+        map.put("proxy.log.logFormat", String.valueOf(getLog().getLogFormat()));
+        map.put("proxy.corsControl.enable", String.valueOf(getCorsControl().isEnable()));
+        map.put("proxy.corsControl.allowCORS", String.valueOf(getCorsControl().isAllowCORS()));
+        return map;
     }
 
     /**
