@@ -1,18 +1,15 @@
-package top.meethigher.proxy.config;
-
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+package top.meethigher.proxy.model;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
+ * 服务信息
+ *
  * @author chenchuancheng
- * @since 2024/06/29 11:55
+ * @since 2024/07/17 23:21
  */
-@Configuration
-@ConfigurationProperties(prefix = "proxy")
-public class ProxyProperties {
+public class ServletInfo {
 
     private String name;
 
@@ -79,6 +76,7 @@ public class ProxyProperties {
         map.put("proxy.corsControl.allowCORS", String.valueOf(getCorsControl().isAllowCORS()));
         return map;
     }
+
 
     /**
      * 跨域控制

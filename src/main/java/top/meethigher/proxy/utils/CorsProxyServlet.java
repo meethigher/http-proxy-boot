@@ -6,6 +6,7 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.mitre.dsmiley.httpproxy.ProxyServlet;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -27,7 +28,7 @@ import static org.springframework.http.HttpHeaders.*;
 public class CorsProxyServlet extends ProxyServlet {
 
 
-    private final boolean enable;
+    private final boolean corsControl;
 
     /**
      * true表示允许跨域
@@ -54,10 +55,24 @@ public class CorsProxyServlet extends ProxyServlet {
             "access-control-request-headers"//在预检请求中使用，指示实际请求将使用的自定义头。
     );
 
-    public CorsProxyServlet(boolean enable, boolean allowCORS, String logFormat) {
-        this.enable = enable;
+    public CorsProxyServlet(boolean crosControl, boolean allowCORS, String logFormat) {
+        this.corsControl = crosControl;
         this.allowCORS = allowCORS;
         this.logFormat = logFormat;
+    }
+
+    @Override
+    protected void service(HttpServletRequest servletRequest, HttpServletResponse servletResponse) throws ServletException, IOException {
+        if (servletRequest.getMethod().equalsIgnoreCase("options") && corsControl && allowCORS) {
+            servletResponse.setHeader(ACCESS_CONTROL_ALLOW_ORIGIN, servletRequest.getHeader("origin"));
+            servletResponse.setHeader(ACCESS_CONTROL_ALLOW_METHODS, "*");
+            servletResponse.setHeader(ACCESS_CONTROL_ALLOW_HEADERS, "*");
+            servletResponse.setHeader(ACCESS_CONTROL_ALLOW_CREDENTIALS, "true");
+            servletResponse.setHeader(ACCESS_CONTROL_EXPOSE_HEADERS, "*");
+            servletResponse.setStatus(HttpServletResponse.SC_OK);
+            return;
+        }
+        super.service(servletRequest, servletResponse);
     }
 
     @Override
@@ -75,7 +90,7 @@ public class CorsProxyServlet extends ProxyServlet {
      * @param response HttpResponse
      */
     protected void corsControl(HttpResponse response, HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
-        if (enable) {
+        if (corsControl) {
             /**
              * 1. 清空所有与跨域相关的响应头
              * 2. 如果允许跨域，则添加跨域允许响应头

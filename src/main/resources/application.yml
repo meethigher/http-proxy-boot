@@ -1,22 +1,32 @@
 logging:
   config: classpath:log/logback.xml
   file:
-    path: ./logs
+    path: logs
 server:
   port: 8080
 proxy:
-  name: proxy
-  # /* represents all interfaces below proxy /, no distinction between /* and /**
-  servletUrl: /*
-  targetUrl: http://10.0.0.1:4321
-  log:
-    enable: true
-    # configure the agent’s log format. the options are remoteAddr、remotePort、userAgent、method、source、target
-    logFormat: "{remoteAddr} {method} uri: {source} --> {target}"
-  corsControl:
-    # true means that the cors of all requests is managed by http-proxy-boot;
-    # false means that the cors of all requests is managed by the source service.
-    enable: false
-    # true means that the cors of all requests is allowed when enable=true
-    # false means that the cors of all requests is not allowed then enable=true
-    allowCORS: true
+  servlets:
+    - name: proxy
+      # /* represents all interfaces below proxy /, no distinction between /* and /**
+      servletUrl: /*
+      targetUrl: https://cn.bing.com
+      log:
+        enable: true
+        # configure the agent’s log format. the options are remoteAddr、remotePort、userAgent、method、source、target
+        logFormat: "{remoteAddr} {method} uri: {source} --> {target}"
+      corsControl:
+        # true means that the cors of all requests is managed by http-proxy-boot;
+        # false means that the cors of all requests is managed by the source service.
+        enable: false
+        # true means that the cors of all requests is allowed when enable=true
+        # false means that the cors of all requests is not allowed then enable=true
+        allowCORS: true
+    - name: proxy1
+      servletUrl: /test/*
+      targetUrl: http://10.0.0.1:4321/test
+      log:
+        enable: true
+        logFormat: "{remoteAddr} {method} uri: {source} --> {target}"
+      corsControl:
+        enable: false
+        allowCORS: false
