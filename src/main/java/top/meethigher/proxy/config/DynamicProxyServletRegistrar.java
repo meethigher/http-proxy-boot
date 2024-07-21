@@ -68,7 +68,6 @@ public class DynamicProxyServletRegistrar implements BeanDefinitionRegistryPostP
     }
 
 
-
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 
@@ -92,8 +91,8 @@ public class DynamicProxyServletRegistrar implements BeanDefinitionRegistryPostP
             servletInfo.setTargetUrl(environment.getProperty(prefix + ".targetUrl"));
 
             ServletInfo.LOG log = new ServletInfo.LOG();
-            log.setEnable(Boolean.parseBoolean(environment.getProperty(prefix + ".log.enable")));
-            log.setLogFormat(environment.getProperty(prefix + ".log.logFormat"));
+            log.setEnable(Boolean.parseBoolean(environment.getProperty(prefix + ".log.enable", "true")));
+            log.setLogFormat(environment.getProperty(prefix + ".log.logFormat", "{remoteAddr} {method} uri: {source} --> {target}"));
             servletInfo.setLog(log);
 
             ServletInfo.CORSControl corsControl = new ServletInfo.CORSControl();

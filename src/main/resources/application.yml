@@ -6,7 +6,7 @@ server:
   port: 8080
 proxy:
   servlets:
-    - name: proxy
+    - name: bing
       # /* represents all interfaces below proxy /, no distinction between /* and /**
       servletUrl: /*
       targetUrl: https://cn.bing.com
@@ -21,9 +21,9 @@ proxy:
         # true means that the cors of all requests is allowed when enable=true
         # false means that the cors of all requests is not allowed then enable=true
         allowCORS: true
-    - name: proxy1
+    - name: jetbrains
       servletUrl: /test/*
-      targetUrl: http://10.0.0.1:4321/test
+      targetUrl: http://jetbrains.meethigher.top
       log:
         enable: true
         logFormat: "{remoteAddr} {method} uri: {source} --> {target}"

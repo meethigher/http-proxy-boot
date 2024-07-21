@@ -12,6 +12,38 @@ server:
 proxy:
   servlets:
     - name: bing
+      servletUrl: /*
+      targetUrl: https://cn.bing.com
+    - name: jetbrains
+      servletUrl: /test/*
+      targetUrl: http://jetbrains.meethigher.top
+```
+
+启动
+
+```sh
+java -jar http-proxy-boot.jar --spring.config.location=application.yml
+```
+
+
+
+跨域参数说明
+
+
+<img src="src/main/resources/instruction.png" alt=""/>
+
+详细参数示例
+
+```yml
+logging:
+  config: classpath:log/logback.xml
+  file:
+    path: logs
+server:
+  port: 8080
+proxy:
+  servlets:
+    - name: bing
       # /* represents all interfaces below proxy /, no distinction between /* and /**
       servletUrl: /*
       targetUrl: https://cn.bing.com
@@ -37,15 +69,3 @@ proxy:
         allowCORS: false
 ```
 
-启动
-
-```sh
-java -jar http-proxy-boot.jar --spring.config.location=application.yml
-```
-
-
-
-跨域参数说明
-
-
-<img src="src/main/resources/instruction.png" alt=""/>
