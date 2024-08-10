@@ -13,7 +13,7 @@ proxy:
       log:
         enable: true
         # configure the agent’s log format. the options are remoteAddr、remotePort、userAgent、method、source、target
-        logFormat: "{remoteAddr} {method} uri: {source} --> {target}"
+        logFormat: "{remoteAddr} {method} uri: {source} --> {target} consumed {consumedMills} ms"
       corsControl:
         # true means that the cors of all requests is managed by http-proxy-boot;
         # false means that the cors of all requests is managed by the source service.
@@ -26,7 +26,7 @@ proxy:
       targetUrl: http://jetbrains.meethigher.top
       log:
         enable: true
-        logFormat: "{remoteAddr} {method} uri: {source} --> {target}"
+        logFormat: "{remoteAddr} {method} uri: {source} --> {target} consumed {consumedMills} ms"
       corsControl:
         enable: false
         allowCORS: false

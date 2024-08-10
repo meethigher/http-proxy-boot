@@ -92,7 +92,7 @@ public class DynamicProxyServletRegistrar implements BeanDefinitionRegistryPostP
 
             ServletInfo.LOG log = new ServletInfo.LOG();
             log.setEnable(Boolean.parseBoolean(environment.getProperty(prefix + ".log.enable", "true")));
-            log.setLogFormat(environment.getProperty(prefix + ".log.logFormat", "{remoteAddr} {method} uri: {source} --> {target}"));
+            log.setLogFormat(environment.getProperty(prefix + ".log.logFormat", "{remoteAddr} {method} uri: {source} --> {target} consumed: {consumedMills} ms"));
             servletInfo.setLog(log);
 
             ServletInfo.CORSControl corsControl = new ServletInfo.CORSControl();

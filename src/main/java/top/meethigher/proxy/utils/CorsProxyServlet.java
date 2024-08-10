@@ -146,16 +146,22 @@ public class CorsProxyServlet extends ProxyServlet {
     @Override
     protected HttpResponse doExecute(HttpServletRequest servletRequest, HttpServletResponse servletResponse,
                                      HttpRequest proxyRequest) throws IOException {
-        if (doLog) {
-            String msg = this.logFormat
-                    .replace("{remoteAddr}", servletRequest.getRemoteAddr())
-                    .replace("{remotePort}", String.valueOf(servletRequest.getRemotePort()))
-                    .replace("{userAgent}", servletRequest.getHeader("User-Agent"))
-                    .replace("{method}", servletRequest.getMethod())
-                    .replace("{source}", servletRequest.getRequestURI())
-                    .replace("{target}", proxyRequest.getRequestLine().getUri());
-            log(msg);
+        long start = System.currentTimeMillis();
+        try {
+            return getProxyClient().execute(getTargetHost(servletRequest), proxyRequest);
+        } finally {
+            long end = System.currentTimeMillis();
+            if (doLog) {
+                String msg = this.logFormat
+                        .replace("{consumedMills}", String.valueOf(end - start))
+                        .replace("{remoteAddr}", servletRequest.getRemoteAddr())
+                        .replace("{remotePort}", String.valueOf(servletRequest.getRemotePort()))
+                        .replace("{userAgent}", servletRequest.getHeader("User-Agent"))
+                        .replace("{method}", servletRequest.getMethod())
+                        .replace("{source}", servletRequest.getRequestURI())
+                        .replace("{target}", proxyRequest.getRequestLine().getUri());
+                log(msg);
+            }
         }
-        return getProxyClient().execute(getTargetHost(servletRequest), proxyRequest);
     }
 }
