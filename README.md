@@ -46,11 +46,15 @@ proxy:
     - name: bing
       # /* represents all interfaces below proxy /, no distinction between /* and /**
       servletUrl: /*
-      targetUrl: https://cn.bing.com
+      targetUrl: https://meethigher.top
+      xForwardedFor: false
+      preserveHost: false
+      preserveCookies: true
+      followRedirects: false
       log:
         enable: true
-        # configure the agent’s log format. the options are remoteAddr、remotePort、userAgent、method、source、target
-        logFormat: "{remoteAddr} {method} uri: {source} --> {target}"
+        # configure the agent’s log format. the options are remoteAddr、remotePort、userAgent、method、source、target、consumedMills
+        logFormat: "{remoteAddr} {method} uri: {source} --> {target} consumed {consumedMills} ms"
       corsControl:
         # true means that the cors of all requests is managed by http-proxy-boot;
         # false means that the cors of all requests is managed by the source service.
@@ -58,14 +62,5 @@ proxy:
         # true means that the cors of all requests is allowed when enable=true
         # false means that the cors of all requests is not allowed then enable=true
         allowCORS: true
-    - name: jetbrains
-      servletUrl: /test/*
-      targetUrl: http://jetbrains.meethigher.top
-      log:
-        enable: true
-        logFormat: "{remoteAddr} {method} uri: {source} --> {target}"
-      corsControl:
-        enable: false
-        allowCORS: false
 ```
 

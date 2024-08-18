@@ -10,13 +10,17 @@ proxy:
       # /* represents all interfaces below proxy /, no distinction between /* and /**
       servletUrl: /*
       targetUrl: https://meethigher.top
-      xForwardedFor: false
-      preserveHost: false
+      # if true, carry header x-forwarded-for
+      xForwardedFor: true
+      # if true, reserve proxy server host
+      preserveHost: true
+      # if true, reserve origin header cookies
       preserveCookies: true
-      followRedirects: false
+      # if true, when requesting a redirect URL, the URL returns the result after the redirect
+      followRedirects: true
       log:
         enable: true
-        # configure the agent’s log format. the options are remoteAddr、remotePort、userAgent、method、source、target
+        # configure the agent’s log format. the options are remoteAddr、remotePort、userAgent、method、source、target、consumedMills
         logFormat: "{remoteAddr} {method} uri: {source} --> {target} consumed {consumedMills} ms"
       corsControl:
         # true means that the cors of all requests is managed by http-proxy-boot;
