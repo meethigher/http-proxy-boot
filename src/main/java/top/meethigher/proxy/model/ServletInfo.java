@@ -20,6 +20,14 @@ public class ServletInfo {
 
     private String targetUrl;
 
+    private boolean xForwardedFor;
+
+    private boolean preserveCookies;
+
+    private boolean preserveHost;
+
+    private boolean followRedirects;
+
     private LOG log;
 
     private CORSControl corsControl;
@@ -65,11 +73,47 @@ public class ServletInfo {
         this.name = name;
     }
 
+    public boolean isxForwardedFor() {
+        return xForwardedFor;
+    }
+
+    public void setxForwardedFor(boolean xForwardedFor) {
+        this.xForwardedFor = xForwardedFor;
+    }
+
+    public boolean isPreserveCookies() {
+        return preserveCookies;
+    }
+
+    public void setPreserveCookies(boolean preserveCookies) {
+        this.preserveCookies = preserveCookies;
+    }
+
+    public boolean isPreserveHost() {
+        return preserveHost;
+    }
+
+    public void setPreserveHost(boolean preserveHost) {
+        this.preserveHost = preserveHost;
+    }
+
+    public boolean isFollowRedirects() {
+        return followRedirects;
+    }
+
+    public void setFollowRedirects(boolean followRedirects) {
+        this.followRedirects = followRedirects;
+    }
+
     public Map<String, String> toMap() {
         Map<String, String> map = new LinkedHashMap<>();
         map.put("proxy.name", getName());
         map.put("proxy.servletUrl", getServletUrl());
         map.put("proxy.targetUrl", getTargetUrl());
+        map.put("proxy.xForwardedFor", String.valueOf(isxForwardedFor()));
+        map.put("proxy.preserveCookies", String.valueOf(isPreserveCookies()));
+        map.put("proxy.preserveHost", String.valueOf(isPreserveHost()));
+        map.put("proxy.followRedirects", String.valueOf(isFollowRedirects()));
         map.put("proxy.log.enable", String.valueOf(getLog().isEnable()));
         map.put("proxy.log.logFormat", String.valueOf(getLog().getLogFormat()));
         map.put("proxy.corsControl.enable", String.valueOf(getCorsControl().isEnable()));

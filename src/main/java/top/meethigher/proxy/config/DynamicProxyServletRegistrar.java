@@ -1,6 +1,7 @@
 package top.meethigher.proxy.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.mitre.dsmiley.httpproxy.ProxyServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -54,7 +55,11 @@ public class DynamicProxyServletRegistrar implements BeanDefinitionRegistryPostP
             //设置网址以及参数
             Map<String, String> params = new HashMap<>();
             params.put("targetUri", servletInfo.getTargetUrl());
-            params.put("log", String.valueOf(servletInfo.getLog().isEnable()));
+            params.put(ProxyServlet.P_FORWARDEDFOR, String.valueOf(servletInfo.isxForwardedFor()));
+            params.put(ProxyServlet.P_PRESERVECOOKIES, String.valueOf(servletInfo.isPreserveCookies()));
+            params.put(ProxyServlet.P_PRESERVEHOST, String.valueOf(servletInfo.isPreserveHost()));
+            params.put(ProxyServlet.P_HANDLEREDIRECTS, String.valueOf(servletInfo.isFollowRedirects()));
+            params.put(ProxyServlet.P_LOG, String.valueOf(servletInfo.getLog().isEnable()));
             //bean.setInitParameters(params);
             //bean.setName(servletInfo.getName());
             beanDefinitionBuilder.addPropertyValue("initParameters", params);
@@ -89,6 +94,10 @@ public class DynamicProxyServletRegistrar implements BeanDefinitionRegistryPostP
             servletInfo.setName(name);
             servletInfo.setServletUrl(environment.getProperty(prefix + ".servletUrl"));
             servletInfo.setTargetUrl(environment.getProperty(prefix + ".targetUrl"));
+            servletInfo.setFollowRedirects(environment.getProperty(prefix+".followRedirects",Boolean.class, Boolean.FALSE));
+            servletInfo.setPreserveHost(environment.getProperty(prefix+".preserveHost",Boolean.class, Boolean.FALSE));
+            servletInfo.setPreserveCookies(environment.getProperty(prefix+".preserveCookies",Boolean.class, Boolean.TRUE));
+            servletInfo.setxForwardedFor(environment.getProperty(prefix+".xForwardedFor",Boolean.class, Boolean.FALSE));
 
             ServletInfo.LOG log = new ServletInfo.LOG();
             log.setEnable(Boolean.parseBoolean(environment.getProperty(prefix + ".log.enable", "true")));
