@@ -4,6 +4,9 @@ logging:
     path: logs
 server:
   port: 8080
+  tomcat:
+    threads:
+      max: 2000
 proxy:
   servlets:
     - name: bing
@@ -32,3 +35,6 @@ proxy:
     - name: jetbrains
       servletUrl: /tes1t/*
       targetUrl: http://jetbrains.meethigher.top
+    - name: ttt
+      servletUrl: /test/*
+      targetUrl: http://10.0.0.1:4321

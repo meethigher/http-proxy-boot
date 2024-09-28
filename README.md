@@ -22,10 +22,14 @@ proxy:
 启动
 
 ```sh
-java -jar http-proxy-boot.jar --spring.config.location=application.yml
+java -Dhttp.maxConnections=2000 -jar http-proxy-boot.jar --spring.config.location=application.yml
 ```
 
-
+> ProxyServlet在转发请求的时候，使用的是bio的形式，也就是转发一个请求需要一个线程。
+>
+> 在源码里面默认是同时支持5并发。参考源码org.apache.http.impl.client.HttpClientBuilder#build。
+>
+> 如果需要修改并发的话，需要自己调整http.maxConnections参数。
 
 跨域参数说明
 
