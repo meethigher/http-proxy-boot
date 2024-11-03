@@ -4,12 +4,21 @@ import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.mitre.dsmiley.httpproxy.ProxyServlet;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -163,5 +172,55 @@ public class CorsProxyServlet extends ProxyServlet {
                 log(msg);
             }
         }
+    }
+
+    /**
+     * 信任所有SSL证书，包括CA证书和自签名证书。实现效果类似于`curl -k`
+     * @see <a href="https://blog.csdn.net/qq_20683411/article/details/142996223">Apache HttpClient 4.3.2 和 4.5.13 - 忽略证书问题_apache 4.3.5 忽略ssl-CSDN博客</a>
+     */
+    public SSLContext trustAllCerts() {
+        try {
+            TrustManager[] trustManagers = {
+                    new X509TrustManager() {
+                        @Override
+                        public void checkClientTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+
+                        }
+
+                        @Override
+                        public void checkServerTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+
+                        }
+
+                        @Override
+                        public X509Certificate[] getAcceptedIssuers() {
+                            return new X509Certificate[0];
+                        }
+                    }
+            };
+            SSLContext sslContext = SSLContext.getInstance("SSL");
+            sslContext.init(null, trustManagers, new SecureRandom());
+            return sslContext;
+        } catch (Exception ignore) {
+
+        }
+        return null;
+    }
+
+    @Override
+    protected HttpClient createHttpClient() {
+        HttpClientBuilder clientBuilder = HttpClientBuilder.create()
+                .setDefaultRequestConfig(buildRequestConfig())
+                .setDefaultSocketConfig(buildSocketConfig());
+        clientBuilder.setMaxConnTotal(maxConnections);
+        if (useSystemProperties) {
+            clientBuilder.useSystemProperties();
+        }
+
+        // 忽略所有SSL证书的验证
+        clientBuilder.setSSLContext(trustAllCerts());
+        clientBuilder.setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE);
+
+        return clientBuilder.build();
     }
 }
