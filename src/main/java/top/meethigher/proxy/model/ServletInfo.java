@@ -26,8 +26,6 @@ public class ServletInfo {
 
     private boolean preserveHost;
 
-    private boolean followRedirects;
-
     private LOG log;
 
     private CORSControl corsControl;
@@ -97,14 +95,6 @@ public class ServletInfo {
         this.preserveHost = preserveHost;
     }
 
-    public boolean isFollowRedirects() {
-        return followRedirects;
-    }
-
-    public void setFollowRedirects(boolean followRedirects) {
-        this.followRedirects = followRedirects;
-    }
-
     public Map<String, String> toMap() {
         Map<String, String> map = new LinkedHashMap<>();
         map.put("proxy.name", getName());
@@ -113,7 +103,6 @@ public class ServletInfo {
         map.put("proxy.xForwardedFor", String.valueOf(isxForwardedFor()));
         map.put("proxy.preserveCookies", String.valueOf(isPreserveCookies()));
         map.put("proxy.preserveHost", String.valueOf(isPreserveHost()));
-        map.put("proxy.followRedirects", String.valueOf(isFollowRedirects()));
         map.put("proxy.log.enable", String.valueOf(getLog().isEnable()));
         map.put("proxy.log.logFormat", String.valueOf(getLog().getLogFormat()));
         map.put("proxy.corsControl.enable", String.valueOf(getCorsControl().isEnable()));

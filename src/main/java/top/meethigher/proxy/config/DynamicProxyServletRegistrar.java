@@ -1,7 +1,6 @@
 package top.meethigher.proxy.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.mitre.dsmiley.httpproxy.ProxyServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -14,12 +13,10 @@ import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import top.meethigher.proxy.model.ServletInfo;
-import top.meethigher.proxy.utils.CorsProxyServlet;
+import top.meethigher.proxy.utils.ProxyServlet;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 动态ProxyServlet注册器
@@ -48,21 +45,12 @@ public class DynamicProxyServletRegistrar implements BeanDefinitionRegistryPostP
     private void addServlet(BeanDefinitionRegistry registry, ServletInfo servletInfo) {
         try {
             BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(ServletRegistrationBean.class);
-            CorsProxyServlet proxyServlet = new CorsProxyServlet(servletInfo.getCorsControl().isEnable(), servletInfo.getCorsControl().isAllowCORS(), servletInfo.getLog().getLogFormat());
-            //ServletRegistrationBean<ProxyServlet> bean = new ServletRegistrationBean<>(proxyServlet, servletInfo.getServletUrl());
+            ProxyServlet proxyServlet = new ProxyServlet(ProxyServlet.okHttpClient(), servletInfo.getTargetUrl(),
+                    servletInfo.getCorsControl().isEnable(), servletInfo.getCorsControl().isAllowCORS(),
+                    servletInfo.getLog().isEnable(), servletInfo.getLog().getLogFormat(),
+                    servletInfo.isxForwardedFor(), servletInfo.isPreserveHost(), servletInfo.isPreserveCookies());
             beanDefinitionBuilder.addConstructorArgValue(proxyServlet);
             beanDefinitionBuilder.addConstructorArgValue(servletInfo.getServletUrl());
-            //设置网址以及参数
-            Map<String, String> params = new HashMap<>();
-            params.put("targetUri", servletInfo.getTargetUrl());
-            params.put(ProxyServlet.P_FORWARDEDFOR, String.valueOf(servletInfo.isxForwardedFor()));
-            params.put(ProxyServlet.P_PRESERVECOOKIES, String.valueOf(servletInfo.isPreserveCookies()));
-            params.put(ProxyServlet.P_PRESERVEHOST, String.valueOf(servletInfo.isPreserveHost()));
-            params.put(ProxyServlet.P_HANDLEREDIRECTS, String.valueOf(servletInfo.isFollowRedirects()));
-            params.put(ProxyServlet.P_LOG, String.valueOf(servletInfo.getLog().isEnable()));
-            //bean.setInitParameters(params);
-            //bean.setName(servletInfo.getName());
-            beanDefinitionBuilder.addPropertyValue("initParameters", params);
             beanDefinitionBuilder.addPropertyValue("name", servletInfo.getName());
             registry.registerBeanDefinition(servletInfo.getName() + "ServletRegistrationBean", beanDefinitionBuilder.getBeanDefinition());
             log.info("all requests to {} will be proxied to {}", servletInfo.getServletUrl(), servletInfo.getTargetUrl());
@@ -94,10 +82,9 @@ public class DynamicProxyServletRegistrar implements BeanDefinitionRegistryPostP
             servletInfo.setName(name);
             servletInfo.setServletUrl(environment.getProperty(prefix + ".servletUrl"));
             servletInfo.setTargetUrl(environment.getProperty(prefix + ".targetUrl"));
-            servletInfo.setFollowRedirects(environment.getProperty(prefix+".followRedirects",Boolean.class, Boolean.FALSE));
-            servletInfo.setPreserveHost(environment.getProperty(prefix+".preserveHost",Boolean.class, Boolean.FALSE));
-            servletInfo.setPreserveCookies(environment.getProperty(prefix+".preserveCookies",Boolean.class, Boolean.TRUE));
-            servletInfo.setxForwardedFor(environment.getProperty(prefix+".xForwardedFor",Boolean.class, Boolean.FALSE));
+            servletInfo.setPreserveHost(environment.getProperty(prefix + ".preserveHost", Boolean.class, Boolean.FALSE));
+            servletInfo.setPreserveCookies(environment.getProperty(prefix + ".preserveCookies", Boolean.class, Boolean.TRUE));
+            servletInfo.setxForwardedFor(environment.getProperty(prefix + ".xForwardedFor", Boolean.class, Boolean.FALSE));
 
             ServletInfo.LOG log = new ServletInfo.LOG();
             log.setEnable(Boolean.parseBoolean(environment.getProperty(prefix + ".log.enable", "true")));
