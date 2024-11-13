@@ -30,7 +30,7 @@ public class DynamicProxyServletRegistrar implements BeanDefinitionRegistryPostP
     private final static Logger log = LoggerFactory.getLogger(DynamicProxyServletRegistrar.class);
 
 
-    private List<ServletInfo> servletInfos = new ArrayList<>();
+    protected List<ServletInfo> servletInfos = new ArrayList<>();
 
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
@@ -53,8 +53,8 @@ public class DynamicProxyServletRegistrar implements BeanDefinitionRegistryPostP
             beanDefinitionBuilder.addConstructorArgValue(servletInfo.getServletUrl());
             beanDefinitionBuilder.addPropertyValue("name", servletInfo.getName());
             registry.registerBeanDefinition(servletInfo.getName() + "ServletRegistrationBean", beanDefinitionBuilder.getBeanDefinition());
-            log.info("all requests to {} will be proxied to {}", servletInfo.getServletUrl(), servletInfo.getTargetUrl());
-            log.info("the configuration parameters are as follows {} {}", System.lineSeparator(), new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(servletInfo.toMap()));
+            log.info("registration router [ {} ][ {} --> {} ] registered {} {}", servletInfo.getName(), servletInfo.getServletUrl(), servletInfo.getTargetUrl(),
+                    System.lineSeparator(), new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(servletInfo.toMap()));
         } catch (Exception e) {
             log.error("addServlet error", e);
         }
@@ -88,7 +88,7 @@ public class DynamicProxyServletRegistrar implements BeanDefinitionRegistryPostP
 
             ServletInfo.LOG log = new ServletInfo.LOG();
             log.setEnable(Boolean.parseBoolean(environment.getProperty(prefix + ".log.enable", "true")));
-            log.setLogFormat(environment.getProperty(prefix + ".log.logFormat", "{remoteAddr} {method} uri: {source} --> {target} consumed: {consumedMills} ms"));
+            log.setLogFormat(environment.getProperty(prefix + ".log.logFormat", "{method} -- {userAgent} -- {remoteAddr}:{remotePort} -- {source} --> {target} -- {statusCode} consumed {consumedMills} ms"));
             servletInfo.setLog(log);
 
             ServletInfo.CORSControl corsControl = new ServletInfo.CORSControl();
@@ -99,9 +99,5 @@ public class DynamicProxyServletRegistrar implements BeanDefinitionRegistryPostP
             servletInfos.add(servletInfo);
             index++;
         }
-    }
-
-    public List<ServletInfo> getServletInfos() {
-        return servletInfos;
     }
 }

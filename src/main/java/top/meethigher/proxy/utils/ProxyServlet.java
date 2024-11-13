@@ -204,6 +204,7 @@ public class ProxyServlet extends HttpServlet {
                         ServletInputStream inputStream = httpServletRequest.getInputStream();
                         requestBody = new StreamingRequestBody(MediaType.parse(httpServletRequest.getContentType()), inputStream);
                     } catch (Exception e) {
+                        e.printStackTrace();
                         writeGatewayError(httpServletResponse, e.getMessage());
                         return;
                     }
@@ -232,10 +233,10 @@ public class ProxyServlet extends HttpServlet {
                         while ((len = is.read(buffer)) != -1) {
                             os.write(buffer, 0, len);
                         }
-                        os.flush();
                     }
                 }
             } catch (Exception e) {
+                e.printStackTrace();
                 writeGatewayError(httpServletResponse, e.getMessage());
                 return;
             }
@@ -245,7 +246,10 @@ public class ProxyServlet extends HttpServlet {
     }
 
     protected Request.Builder getInitRequestBuilder(HttpServletRequest request, HttpServletResponse response) {
-        return new Request.Builder();
+        Request.Builder builder = new Request.Builder();
+        // 弱网情况下，使用keep-alive会遇到一些问题。使用短连接会影响性能，该工具的宗旨是 稳定 > 性能
+        builder.header("Connection", "close");
+        return builder;
     }
 
 

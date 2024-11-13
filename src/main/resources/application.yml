@@ -37,4 +37,4 @@ proxy:
       targetUrl: http://jetbrains.meethigher.top
     - name: ttt
       servletUrl: /test/*
-      targetUrl: http://10.0.0.1:4321
+      targetUrl: http://127.0.0.1:4321
