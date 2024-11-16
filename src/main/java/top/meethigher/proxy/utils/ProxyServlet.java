@@ -375,7 +375,8 @@ public class ProxyServlet extends HttpServlet {
     public synchronized static OkHttpClient okHttpClient() {
         if (okHttpClient == null) {
             OkHttpClient.Builder builder = new OkHttpClient().newBuilder()
-                    .connectionPool(new ConnectionPool(2, 60, TimeUnit.SECONDS))
+                    .retryOnConnectionFailure(false)
+                    .connectionPool(new ConnectionPool(5, 60, TimeUnit.SECONDS))
                     .connectTimeout(10, TimeUnit.SECONDS)
                     .readTimeout(30, TimeUnit.SECONDS)
                     .writeTimeout(30, TimeUnit.SECONDS);

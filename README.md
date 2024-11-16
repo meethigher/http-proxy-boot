@@ -9,6 +9,9 @@ logging:
     path: logs
 server:
   port: 8080
+  tomcat:
+    threads:
+      max: 5000
 proxy:
   servlets:
     - name: bing
@@ -39,6 +42,9 @@ logging:
     path: logs
 server:
   port: 8080
+  tomcat:
+    threads:
+      max: 5000
 proxy:
   servlets:
     - name: bing
