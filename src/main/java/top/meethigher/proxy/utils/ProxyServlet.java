@@ -124,7 +124,6 @@ public class ProxyServlet extends HttpServlet {
      * 将重定向的url，重写为代理服务器的地址
      */
     protected String rewriteUrlFromResponse(HttpServletRequest request, String locationUrl) {
-        String targetUrl = getTargetUrl(request);
         if (locationUrl != null && locationUrl.startsWith(targetUrl)) {
             StringBuffer curUrl = request.getRequestURL();
             int pos;
