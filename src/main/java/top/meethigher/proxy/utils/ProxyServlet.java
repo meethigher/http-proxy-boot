@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author <a href="https://meethigher.top">chenchuancheng</a>
  * @see <a href="https://github.com/mitre/HTTP-Proxy-Servlet">mitre/HTTP-Proxy-Servlet: Smiley&#39;s HTTP Proxy implemented as a Java servlet</a>
+ * @see <a href="https://www.mnot.net/blog/2011/07/11/what_proxies_must_do">What Proxies Must Do</a>
  * @since 2024/11/09 22:43
  */
 public class ProxyServlet extends HttpServlet {
@@ -313,6 +314,9 @@ public class ProxyServlet extends HttpServlet {
         Enumeration<String> headerNames = httpServletRequest.getHeaderNames();
         while (headerNames.hasMoreElements()) {
             String key = headerNames.nextElement();
+            if (containsHopByHopHeader(key)) {
+                continue;
+            }
             if ("host".equalsIgnoreCase(key)) {
                 if (preserveHost) {
                     requestBuilder.header(key, httpServletRequest.getHeader(key));
