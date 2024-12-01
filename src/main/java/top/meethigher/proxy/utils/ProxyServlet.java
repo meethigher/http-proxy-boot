@@ -384,7 +384,7 @@ public class ProxyServlet extends HttpServlet {
                     .readTimeout(30, TimeUnit.SECONDS)
                     .writeTimeout(30, TimeUnit.SECONDS);
             builder.followRedirects(false);
-            builder.followSslRedirects(true);
+            builder.followSslRedirects(false);
             builder.hostnameVerifier(new HostnameVerifier() {
                 @Override
                 public boolean verify(final String s, final SSLSession sslSession) {
