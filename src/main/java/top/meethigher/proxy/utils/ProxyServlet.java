@@ -202,7 +202,8 @@ public class ProxyServlet extends HttpServlet {
                 if (httpServletRequest.getHeader("Content-Length") != null || httpServletRequest.getHeader("Transfer-Encoding") != null) {
                     try {
                         ServletInputStream inputStream = httpServletRequest.getInputStream();
-                        requestBody = new StreamingRequestBody(MediaType.parse(httpServletRequest.getContentType()), inputStream);
+                        String contentType = httpServletRequest.getContentType();
+                        requestBody = new StreamingRequestBody(contentType == null ? null : MediaType.parse(contentType), inputStream);
                     } catch (Exception e) {
                         e.printStackTrace();
                         writeGatewayError(httpServletResponse, e.getMessage());
