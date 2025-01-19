@@ -13,7 +13,7 @@ import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import top.meethigher.proxy.model.ServletInfo;
-import top.meethigher.proxy.utils.ProxyServlet;
+import top.meethigher.servlet.ProxyServlet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,6 +86,7 @@ public class DynamicProxyServletRegistrar implements BeanDefinitionRegistryPostP
             servletInfo.setPreserveHost(environment.getProperty(prefix + ".preserveHost", Boolean.class, Boolean.FALSE));
             servletInfo.setPreserveCookies(environment.getProperty(prefix + ".preserveCookies", Boolean.class, Boolean.TRUE));
             servletInfo.setxForwardedFor(environment.getProperty(prefix + ".xForwardedFor", Boolean.class, Boolean.FALSE));
+            servletInfo.setHttpKeepAlive(environment.getProperty(prefix + ".httpKeepAlive", Boolean.class, Boolean.FALSE));
 
             ServletInfo.LOG log = new ServletInfo.LOG();
             log.setEnable(Boolean.parseBoolean(environment.getProperty(prefix + ".log.enable", "true")));

@@ -35,6 +35,12 @@
             <artifactId>okhttp</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>top.meethigher</groupId>
+            <artifactId>proxy-servlet</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
     </dependencies>
     <build>
         <finalName>${project.name}</finalName>
