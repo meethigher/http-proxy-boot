@@ -48,7 +48,8 @@ public class DynamicProxyServletRegistrar implements BeanDefinitionRegistryPostP
             ProxyServlet proxyServlet = new ProxyServlet(ProxyServlet.okHttpClient(), servletInfo.getTargetUrl(),
                     servletInfo.getCorsControl().isEnable(), servletInfo.getCorsControl().isAllowCORS(),
                     servletInfo.getLog().isEnable(), servletInfo.getLog().getLogFormat(),
-                    servletInfo.isxForwardedFor(), servletInfo.isPreserveHost(), servletInfo.isPreserveCookies());
+                    servletInfo.isxForwardedFor(), servletInfo.isPreserveHost(), servletInfo.isPreserveCookies(),
+                    servletInfo.isHttpKeepAlive());
             beanDefinitionBuilder.addConstructorArgValue(proxyServlet);
             beanDefinitionBuilder.addConstructorArgValue(servletInfo.getServletUrl());
             beanDefinitionBuilder.addPropertyValue("name", servletInfo.getName());

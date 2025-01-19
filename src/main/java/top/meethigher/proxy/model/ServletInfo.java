@@ -26,6 +26,8 @@ public class ServletInfo {
 
     private boolean preserveHost;
 
+    private boolean httpKeepAlive;
+
     private LOG log;
 
     private CORSControl corsControl;
@@ -49,6 +51,14 @@ public class ServletInfo {
 
     public LOG getLog() {
         return log;
+    }
+
+    public boolean isHttpKeepAlive() {
+        return httpKeepAlive;
+    }
+
+    public void setHttpKeepAlive(boolean httpKeepAlive) {
+        this.httpKeepAlive = httpKeepAlive;
     }
 
     public void setLog(LOG log) {
@@ -103,6 +113,7 @@ public class ServletInfo {
         map.put("proxy.xForwardedFor", String.valueOf(isxForwardedFor()));
         map.put("proxy.preserveCookies", String.valueOf(isPreserveCookies()));
         map.put("proxy.preserveHost", String.valueOf(isPreserveHost()));
+        map.put("proxy.httpKeepAlive", String.valueOf(isHttpKeepAlive()));
         map.put("proxy.log.enable", String.valueOf(getLog().isEnable()));
         map.put("proxy.log.logFormat", String.valueOf(getLog().getLogFormat()));
         map.put("proxy.corsControl.enable", String.valueOf(getCorsControl().isEnable()));

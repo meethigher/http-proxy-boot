@@ -40,6 +40,7 @@ public class ProxyServlet extends HttpServlet {
     protected final boolean forwardIp; // 遵循代理规范，将实际调用方的ip和protocol传给目标服务器
     protected final boolean preserveHost; // 保留原host，这个仅对请求头有效。
     protected final boolean preserveCookie; // 保留原cookie。这个对请求头和响应头均有效。
+    protected final boolean httpKeepAlive; // 网关内部HTTP使用使用keep-alive
     protected final String logFormat; // 日志格式
 
     /**
@@ -140,7 +141,7 @@ public class ProxyServlet extends HttpServlet {
         return locationUrl;
     }
 
-    public ProxyServlet(OkHttpClient client, String targetUrl, boolean corsControl, boolean allowCORS, boolean logEnable, String logFormat, boolean forwardIp, boolean preserveHost, boolean preserveCookie) {
+    public ProxyServlet(OkHttpClient client, String targetUrl, boolean corsControl, boolean allowCORS, boolean logEnable, String logFormat, boolean forwardIp, boolean preserveHost, boolean preserveCookie, boolean httpKeepAlive) {
         this.client = client;
         this.targetUrl = targetUrl;
         this.corsControl = corsControl;
@@ -150,10 +151,11 @@ public class ProxyServlet extends HttpServlet {
         this.preserveHost = preserveHost;
         this.preserveCookie = preserveCookie;
         this.logFormat = logFormat;
+        this.httpKeepAlive = httpKeepAlive;
     }
 
     public ProxyServlet(OkHttpClient client, String targetUrl) {
-        this(client, targetUrl, false, false, true, LOG_FORMAT_DEFAULT, false, false, false);
+        this(client, targetUrl, false, false, true, LOG_FORMAT_DEFAULT, false, false, false, false);
     }
 
     /**
@@ -248,8 +250,12 @@ public class ProxyServlet extends HttpServlet {
 
     protected Request.Builder getInitRequestBuilder(HttpServletRequest request, HttpServletResponse response) {
         Request.Builder builder = new Request.Builder();
-        // 弱网情况下，使用keep-alive会遇到一些问题。使用短连接会影响性能，该工具的宗旨是 稳定 > 性能
-        builder.header("Connection", "close");
+        if (httpKeepAlive) {
+            builder.header("Connection", "keep-alive");
+        } else {
+            // 使用短连接会影响性能，但在极端弱网下，使用keep-alive长连接反而会存在问题。因此从稳定角度而言，此时应该选短连接
+            builder.header("Connection", "close");
+        }
         return builder;
     }
 
