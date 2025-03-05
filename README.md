@@ -1,4 +1,4 @@
-借鉴[开源HTTP-Proxy-Servlet](https://github.com/mitre/HTTP-Proxy-Servlet)使用okhttp3实现的开箱即用的Java HTTP反向代理工具，支持根据路径代理至不同路径
+借鉴[开源HTTP-Proxy-Servlet](https://github.com/mitre/HTTP-Proxy-Servlet)使用vertx实现的开箱即用的Java HTTP反向代理工具，支持根据路径代理至不同路径
 
 创建配置文件 `application.yml` 
 

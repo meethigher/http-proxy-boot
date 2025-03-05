@@ -1,19 +1,19 @@
 package top.meethigher.proxy.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
-import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
+import top.meethigher.proxy.http.ProxyRoute;
+import top.meethigher.proxy.http.ReverseHttpProxy;
 import top.meethigher.proxy.model.ServletInfo;
-import top.meethigher.servlet.ProxyServlet;
+import top.meethigher.proxy.utils.VertxUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,32 +32,37 @@ public class DynamicProxyServletRegistrar implements BeanDefinitionRegistryPostP
 
     protected List<ServletInfo> servletInfos = new ArrayList<>();
 
+    protected Integer port;
+
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
-        for (ServletInfo servletInfo : servletInfos) {
-            addServlet(registry, servletInfo);
+        // order越小，优先级越高。配置文件中的效果就是越靠后优先级高。
+        for (int i = servletInfos.size() - 1, j = 0; i >= 0; i--, j++) {
+            addRoute(registry, servletInfos.get(i), j);
         }
+        VertxUtils.httpProxy().port(port).start();
     }
 
     /**
      * 注册ProxyServlet
      */
-    private void addServlet(BeanDefinitionRegistry registry, ServletInfo servletInfo) {
+    private void addRoute(BeanDefinitionRegistry registry, ServletInfo servletInfo, Integer order) {
         try {
-            BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(ServletRegistrationBean.class);
-            ProxyServlet proxyServlet = new ProxyServlet(ProxyServlet.okHttpClient(), servletInfo.getTargetUrl(),
-                    servletInfo.getCorsControl().isEnable(), servletInfo.getCorsControl().isAllowCORS(),
-                    servletInfo.getLog().isEnable(), servletInfo.getLog().getLogFormat(),
-                    servletInfo.isxForwardedFor(), servletInfo.isPreserveHost(), servletInfo.isPreserveCookies(),
-                    servletInfo.isHttpKeepAlive());
-            beanDefinitionBuilder.addConstructorArgValue(proxyServlet);
-            beanDefinitionBuilder.addConstructorArgValue(servletInfo.getServletUrl());
-            beanDefinitionBuilder.addPropertyValue("name", servletInfo.getName());
-            registry.registerBeanDefinition(servletInfo.getName() + "ServletRegistrationBean", beanDefinitionBuilder.getBeanDefinition());
-            log.info("registration router [ {} ][ {} --> {} ] registered {} {}", servletInfo.getName(), servletInfo.getServletUrl(), servletInfo.getTargetUrl(),
-                    System.lineSeparator(), new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(servletInfo.toMap()));
+            ReverseHttpProxy reverseHttpProxy = VertxUtils.httpProxy();
+            ProxyRoute proxyRoute = new ProxyRoute()
+                    .setName(servletInfo.getName())
+                    .setSourceUrl(servletInfo.getServletUrl())
+                    .setTargetUrl(servletInfo.getTargetUrl())
+                    .setFollowRedirects(false)
+                    .setForwardIp(servletInfo.isxForwardedFor())
+                    .setHttpKeepAlive(servletInfo.isHttpKeepAlive())
+                    .setPreserveCookies(servletInfo.isPreserveCookies())
+                    .setPreserveHost(servletInfo.isPreserveHost());
+            proxyRoute.getLog().setEnable(servletInfo.getLog().isEnable()).setLogFormat(servletInfo.getLog().getLogFormat());
+            proxyRoute.getCorsControl().setEnable(servletInfo.getCorsControl().isEnable()).setAllowCors(servletInfo.getCorsControl().isAllowCORS());
+            reverseHttpProxy.addRoute(proxyRoute, order);
         } catch (Exception e) {
-            log.error("addServlet error", e);
+            log.error("addRoute error", e);
         }
     }
 
@@ -73,6 +78,8 @@ public class DynamicProxyServletRegistrar implements BeanDefinitionRegistryPostP
          * 通过 Environment 将 yaml 配置文件转换成实体类
          */
         int index = 0;
+        port = environment.getProperty("server.port", Integer.class, 8080);
+
         while (true) {
             String prefix = "proxy.servlets[" + index + "]";
             String name = environment.getProperty(prefix + ".name");
@@ -90,7 +97,7 @@ public class DynamicProxyServletRegistrar implements BeanDefinitionRegistryPostP
 
             ServletInfo.LOG log = new ServletInfo.LOG();
             log.setEnable(Boolean.parseBoolean(environment.getProperty(prefix + ".log.enable", "true")));
-            log.setLogFormat(environment.getProperty(prefix + ".log.logFormat", "{method} -- {userAgent} -- {remoteAddr}:{remotePort} -- {source} --> {target} -- {statusCode} consumed {consumedMills} ms"));
+            log.setLogFormat(environment.getProperty(prefix + ".log.logFormat", "{name} -- {method} -- {userAgent} -- {remoteAddr}:{remotePort} -- {source} --> {target} -- {statusCode} consumed {consumedMills} ms"));
             servletInfo.setLog(log);
 
             ServletInfo.CORSControl corsControl = new ServletInfo.CORSControl();

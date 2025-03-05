@@ -11,12 +11,14 @@
     </parent>
     <groupId>top.meethigher</groupId>
     <artifactId>http-proxy-boot</artifactId>
-    <version>1.41</version>
+    <version>2.0.0</version>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <netty.version>4.1.111.Final</netty.version>
+        <netty-tcnative.version>2.0.65.Final</netty-tcnative.version>
     </properties>
 
 
@@ -26,18 +28,22 @@
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
 
+
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-core</artifactId>
+            <version>4.5.10</version>
         </dependency>
+
         <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-web</artifactId>
+            <version>4.5.10</version>
         </dependency>
 
         <dependency>
             <groupId>top.meethigher</groupId>
-            <artifactId>proxy-servlet</artifactId>
+            <artifactId>tcp-reverse-proxy</artifactId>
             <version>1.0.0</version>
         </dependency>
 
