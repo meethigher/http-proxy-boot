@@ -20,7 +20,7 @@ proxy:
       followRedirects: true
       log:
         enable: true
-        # configure the agent’s log format. the options are remoteAddr、remotePort、userAgent、method、source、target、consumedMills
+        # configure the agent’s log format.
         logFormat: "{name} -- {sourceUri} -- {proxyUrl} -- {statusCode} -- consumed {consumedMills} ms"
       corsControl:
         # true means that the cors of all requests is managed by http-proxy-boot;

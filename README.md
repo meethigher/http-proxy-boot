@@ -9,9 +9,6 @@ logging:
     path: logs
 server:
   port: 8080
-  tomcat:
-    threads:
-      max: 5000
 proxy:
   servlets:
     - name: bing
@@ -42,9 +39,6 @@ logging:
     path: logs
 server:
   port: 8080
-  tomcat:
-    threads:
-      max: 5000
 proxy:
   servlets:
     - name: bing
@@ -57,8 +51,8 @@ proxy:
       followRedirects: false
       log:
         enable: true
-        # configure the agent’s log format. the options are remoteAddr、remotePort、userAgent、method、source、target、consumedMills
-        logFormat: "{remoteAddr} {method} uri: {source} --> {target} consumed {consumedMills} ms"
+        # configure the agent’s log format.
+        logFormat: "{name} -- {serverHttpVersion} -- {clientHttpVersion} -- {method} -- {userAgent} -- {serverRemoteAddr} -- {clientLocalAddr} -- {sourceUri} -- {proxyUrl} -- {statusCode} -- consumed {consumedMills} ms"
       corsControl:
         # true means that the cors of all requests is managed by http-proxy-boot;
         # false means that the cors of all requests is managed by the source service.
