@@ -2,7 +2,6 @@ package top.meethigher.proxy;
 
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
-import ch.qos.logback.core.joran.spi.JoranException;
 import io.vertx.core.Vertx;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -39,8 +38,7 @@ public class App {
     public static void loadConfigFromClasspath(String classpathConfigFile) {
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         context.reset();  // 先重置当前的 Logback 配置
-
-        context.putProperty("test","logs");
+        context.putProperty("test", "logs");
         try {
             // 获取 classpath 下的配置文件
             URL configFile = App.class.getClassLoader().getResource(classpathConfigFile);
@@ -53,9 +51,9 @@ public class App {
             configurator.setContext(context);
             configurator.doConfigure(configFile);
 
-            System.out.println("Logback 配置加载成功：" + classpathConfigFile);
-        } catch (JoranException e) {
-            throw new RuntimeException("加载 Logback 配置失败", e);
+            System.out.println("Logback configuration loaded successfully: " + classpathConfigFile);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load Logback configuration", e);
         }
     }
 }
