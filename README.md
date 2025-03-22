@@ -25,6 +25,8 @@ reverse:
   http:
     enable: false
     port: 8080
+    # DNS解析预热。当一台机器有多个DNS服务时，建议将该参数开启，可以预热缓存
+    preheatDns: false
     # 最大使用的eventloop线程数
     maxThreads: 1
     # 单个eventloop最大可以处理的http1请求
@@ -57,5 +59,11 @@ reverse:
         corsControl: false
         # 是否允许跨域。当corsControl开启时生效
         corsAllow: true
+      - name: route2
+        sourceUrl: /test/*
+        targetUrl: https://meethigher.top
+      - name: route3
+        sourceUrl: /test1/*
+        targetUrl: https://reqres.in
 ```
 
