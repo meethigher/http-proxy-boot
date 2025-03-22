@@ -103,7 +103,7 @@ public class Utils {
                 if (vertx == null) {
                     VertxOptions options = new VertxOptions()
                             .setAddressResolverOptions(new AddressResolverOptions()
-                                    .setQueryTimeout(10000))
+                                    .setQueryTimeout(2000))
                             .setUseDaemonThread(false);
                     vertx = Vertx.vertx(options);
                 }

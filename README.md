@@ -63,7 +63,7 @@ reverse:
         sourceUrl: /test/*
         targetUrl: https://meethigher.top
       - name: route3
-        sourceUrl: /test1/*
-        targetUrl: https://reqres.in
+        sourceUrl: /static/*
+        targetUrl: static:D:/3Develop/www
 ```
 

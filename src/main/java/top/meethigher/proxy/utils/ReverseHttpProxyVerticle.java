@@ -38,7 +38,7 @@ public class ReverseHttpProxyVerticle extends AbstractVerticle {
         HttpServerOptions httpServerOptions = new HttpServerOptions()
                 // 服务端支持与客户端进行协商，使用h2c（HTTP/2 cleartext）
                 // 常规情况下，h2只在开启了tls使用。如果不开启tls，需要指定使用的是h2c
-                .setAlpnVersions(Collections.unmodifiableList(Arrays.asList(HttpVersion.HTTP_1_1,HttpVersion.HTTP_2)))
+                .setAlpnVersions(Collections.unmodifiableList(Arrays.asList(HttpVersion.HTTP_1_1, HttpVersion.HTTP_2)))
                 .setUseAlpn(true)
                 .setHttp2ClearTextEnabled(true);
         ReverseHttpProxy httpProxy = ReverseHttpProxy.create(router,
@@ -58,7 +58,7 @@ public class ReverseHttpProxyVerticle extends AbstractVerticle {
                     .setHttpKeepAlive(r.getHttpKeepAlive())
                     .setLog(new ProxyRoute.Log().setEnable(r.getLogEnable()).setLogFormat(r.getLogFormat()))
                     .setCorsControl(new ProxyRoute.CorsControl().setEnable(r.getCorsControl()).setAllowCors(r.getCorsAllow()));
-            httpProxy.addRoute(proxyRoute, order);
+            httpProxy.addRoute(proxyRoute, order, false);
         }
         httpProxy.start();
     }
