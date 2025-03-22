@@ -1,20 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 参考自 https://meethigher.top/blog/2024/logback-pattern/  -->
 <configuration scan="true" scanPeriod="5 seconds">
-
-    <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter"/>
-    <conversionRule conversionWord="wex"
-                    converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter"/>
-    <conversionRule conversionWord="wEx"
-                    converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter"/>
-
-    <!-- 可以读取spring中配置 -->
-    <springProperty scope="context" name="test" source="logging.file.path"/>
-    <property name="LOG_HOME" value="${test}"/>
+    <property name="LOG_HOME" value="${LOG_HOME}"/>
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <Target>System.out</Target>
         <encoder>
-            <pattern>%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr(:){faint} %m%n%wEx</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %5p : %msg%n%ex{5}</pattern>
             <charset>utf-8</charset>
         </encoder>
     </appender>

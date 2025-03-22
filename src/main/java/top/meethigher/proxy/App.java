@@ -1,59 +1,42 @@
 package top.meethigher.proxy;
 
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.joran.JoranConfigurator;
 import io.vertx.core.Vertx;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import top.meethigher.proxy.tcp.ReverseTcpProxy;
+import top.meethigher.proxy.model.Http;
+import top.meethigher.proxy.model.Reverse;
+import top.meethigher.proxy.model.Tcp;
+import top.meethigher.proxy.utils.ReverseHttpProxyVerticle;
+import top.meethigher.proxy.utils.ReverseTcpProxyVerticle;
+import top.meethigher.proxy.utils.Utils;
 
-import java.net.URL;
-import java.util.Scanner;
-
-@SpringBootApplication
 public class App {
-    public static void main(String[] args) {
-        String model = System.getProperty("proxy.mode", "http");
-        if (!"http".equalsIgnoreCase(model)) {
-            loadConfigFromClasspath("log/logback.xml");
-            System.out.println("The mode you are using now is TCP Reverse Proxy");
-            Scanner scanner = new Scanner(System.in);
-            System.out.print("Enter the target host: ");
-            String targetHost = scanner.next();
-            System.out.print("Enter the target port: ");
-            int targetPort = scanner.nextInt();
-            System.out.print("Enter the listening port: ");
-            int port = scanner.nextInt();
-            ReverseTcpProxy.create(Vertx.vertx(), targetHost, targetPort)
-                    .port(port)
-                    .start();
 
+
+    public static void main(String[] args) {
+        // 指定logback使用的环境变量
+        System.setProperty("LOG_HOME", "logs");
+        Utils.loadLogConfig();
+        Reverse reverse = Utils.loadApplicationConfig();
+        Tcp tcp = reverse.getTcp();
+        Http http = reverse.getHttp();
+        Vertx vertx = Utils.vertx();
+        if (tcp.getEnable()) {
+            registerReverseTcpProxy(vertx, tcp);
+        } else if (http.getEnable()) {
+            registerReverseHttpProxy(vertx, http);
         } else {
-            SpringApplication.run(App.class, args);
+            throw new IllegalArgumentException("you need to enable tcp or http");
         }
     }
 
+    private static void registerReverseHttpProxy(Vertx vertx, Http http) {
+        for (int i = 0; i < http.getMaxThreads(); i++) {
+            vertx.deployVerticle(new ReverseHttpProxyVerticle(http.getPort(), http));
+        }
+    }
 
-    public static void loadConfigFromClasspath(String classpathConfigFile) {
-        LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-        context.reset();  // 先重置当前的 Logback 配置
-        context.putProperty("test", "logs");
-        try {
-            // 获取 classpath 下的配置文件
-            URL configFile = App.class.getClassLoader().getResource(classpathConfigFile);
-            if (configFile == null) {
-                throw new IllegalArgumentException("Logback configuration file not found: " + classpathConfigFile);
-            }
-
-            // 使用 JoranConfigurator 加载配置
-            JoranConfigurator configurator = new JoranConfigurator();
-            configurator.setContext(context);
-            configurator.doConfigure(configFile);
-
-            System.out.println("Logback configuration loaded successfully: " + classpathConfigFile);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to load Logback configuration", e);
+    private static void registerReverseTcpProxy(Vertx vertx, Tcp tcp) {
+        for (int i = 0; i < tcp.getMaxThreads(); i++) {
+            vertx.deployVerticle(new ReverseTcpProxyVerticle(tcp.getPort(), tcp));
         }
     }
 }
