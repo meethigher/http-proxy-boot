@@ -16,5 +16,6 @@ public class Http implements Serializable {
     private Integer http1MaxSize = 5000;
     private Integer http2MaxSize = 1000;
     private List<Router> routers = new ArrayList<Router>();
+    private Boolean preheatDns = false;
 
 }
