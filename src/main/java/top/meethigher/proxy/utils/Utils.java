@@ -154,8 +154,9 @@ public class Utils {
      */
     public static void preheatDns(Http http) {
         log.info("preheat dns start");
+        long startTimestamp = System.currentTimeMillis();
+        HttpClient httpClient = vertx().createHttpClient(new HttpClientOptions().setVerifyHost(false).setTrustAll(true));
         try {
-            HttpClient httpClient = vertx().createHttpClient(new HttpClientOptions().setVerifyHost(false).setTrustAll(true));
             Set<String> domains = new HashSet<>();
             for (Router router : http.getRouters()) {
                 try {
@@ -185,7 +186,8 @@ public class Utils {
         } catch (Exception e) {
             log.error("preheat dns failure", e);
         } finally {
-            log.info("preheat dns end");
+            httpClient.close();
+            log.info("preheat dns end, consumed {} ms", System.currentTimeMillis() - startTimestamp);
         }
     }
 

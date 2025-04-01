@@ -5,6 +5,8 @@ import top.meethigher.proxy.model.Http;
 import top.meethigher.proxy.model.Reverse;
 import top.meethigher.proxy.model.Tcp;
 
+import java.util.concurrent.Callable;
+
 import static top.meethigher.proxy.utils.Utils.*;
 
 public class App {
@@ -21,7 +23,10 @@ public class App {
             registerReverseTcpProxy(vertx, tcp);
         } else if (http.getEnable()) {
             if (http.getPreheatDns()) {
-                preheatDns(http);
+                vertx().executeBlocking((Callable<Void>) () -> {
+                    preheatDns(http);
+                    return null;
+                });
             }
             registerReverseHttpProxy(vertx, http);
         } else {
