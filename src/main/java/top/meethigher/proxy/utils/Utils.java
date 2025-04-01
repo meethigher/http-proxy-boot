@@ -14,6 +14,7 @@ import org.yaml.snakeyaml.Yaml;
 import top.meethigher.proxy.model.Http;
 import top.meethigher.proxy.model.Reverse;
 import top.meethigher.proxy.model.Router;
+import top.meethigher.proxy.model.Tcp;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,6 +33,24 @@ public class Utils {
     private static final String CONFIG_FILE_NAME = "application.yml";
 
     private volatile static Vertx vertx;
+
+    public static void registerReverseHttpProxy(Vertx vertx, Http http) {
+        for (int i = 0; i < http.getMaxThreads(); i++) {
+            vertx.deployVerticle(new ReverseHttpProxyVerticle(http.getPort(), http)).onFailure(e -> {
+                log.error("deploy reverse http proxy failed", e);
+                System.exit(1);
+            });
+        }
+    }
+
+    public static void registerReverseTcpProxy(Vertx vertx, Tcp tcp) {
+        for (int i = 0; i < tcp.getMaxThreads(); i++) {
+            vertx.deployVerticle(new ReverseTcpProxyVerticle(tcp.getPort(), tcp)).onFailure(e -> {
+                log.error("deploy reverse tcp proxy failed", e);
+                System.exit(1);
+            });
+        }
+    }
 
     public static Map<String, Object> loadYaml() {
         Yaml yaml = new Yaml();
