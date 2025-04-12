@@ -35,7 +35,7 @@ jobs:
       # 构建jar包
       - name: Build with Maven
         run: mvn package -DskipTests
-      - run: mkdir staging && cp target/*.jar staging && cp target/classes/*.yml staging
+      - run: mkdir staging && cp target/http-proxy-boot.jar staging && cp target/classes/*.yml staging && cp target/classes/logback.xml staging
       # 上传打包后内容到artifact
       - name: Upload JAR artifact
         uses: actions/upload-artifact@v4

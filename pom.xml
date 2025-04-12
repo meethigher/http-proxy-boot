@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>top.meethigher</groupId>
     <artifactId>http-proxy-boot</artifactId>
-    <version>3.0.0</version>
+    <version>3.0.1</version>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -107,6 +107,12 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
+        </dependency>
+
+        <!-- JDK1.8.0_361及以上版本不需要。该Jar包约占5MB，为了解决JDK1.8.0_242版本出现问题：<a href="https://github.com/eclipse-vertx/vert.x/issues/3387">ALPN not available for JDK SSL/TLS engine · Issue #3387 · eclipse-vertx/vert.x</a> -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-tcnative-boringssl-static</artifactId>
         </dependency>
 
     </dependencies>

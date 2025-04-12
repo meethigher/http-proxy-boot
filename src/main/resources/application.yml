@@ -1,6 +1,8 @@
 reverse:
-  tcp:
+  http:
     enable: true
     port: 80
-    targetHost: meethigher.top
-    targetPort: 80
+    routers:
+      - name: proxy
+        sourceUrl: /*
+        targetUrl: https://meethigher.top
