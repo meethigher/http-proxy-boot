@@ -1,3 +1,9 @@
+支持功能如下
+
+1. HTTP反向代理
+2. TCP反向代理
+3. TCP内网穿透
+
 下载[Releases · meethigher/http-proxy-boot](https://github.com/meethigher/http-proxy-boot/releases)
 
 使用方式
@@ -9,11 +15,51 @@ java -jar http-proxy-boot.jar
 配置文件 application.yml 示例
 
 ```yml
-# 反向代理。支持tcp与http两种反代模式。应用启动时只支持一种模式
+# 反向代理。支持多种模式，只能启用一种模式
 reverse:
+  # tcp内网穿透-Client端
+  tunnelClient:
+    enable: false
+    # 失败重连最小延迟，单位毫秒
+    minDelay: 1000
+    # 失败重连最大延迟，单位毫秒
+    maxDelay: 64000
+    # 控制服务地址
+    host: 127.0.0.1
+    # 控制服务端口
+    port: 44444
+    # 鉴权密钥
+    secret: 0123456789
+    # 穿透后的服务名称
+    dataProxyName: ssh-proxy
+    # 穿透后的服务地址
+    dataProxyHost: 127.0.0.1
+    # 穿透后的服务端口
+    dataProxyPort: 22
+    # 需要穿透的后端服务地址
+    backendHost: meethigher.top
+    # 需要穿透的后端端口
+    backendPort: 22
+  # tcp内网穿透-Server端
+  tunnelServer:
+    enable: false
+    # 控制服务监听地址
+    host: 0.0.0.0
+    # 控制服务监听端口
+    port: 44444
+    # 鉴权密钥
+    secret: 0123456789
+    # 连接类型的延迟判定，在弱网情况下，该参数需要调大。单位毫秒
+    judgeDelay: 2000
+    # 心跳间隔。单位毫秒
+    heartbeatDelay: 30000
+    # 空闲连接超时端口。单位毫秒。该值要比心跳值要大方可
+    idleTimeout: 60000
+    # 最大使用的eventloop线程数
+    maxThreads: 1
   # tcp反向代理
   tcp:
-    enable: true
+    enable: false
     port: 8080
     # 最大使用的eventloop线程数
     maxThreads: 1
