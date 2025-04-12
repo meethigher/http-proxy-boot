@@ -9,8 +9,11 @@ public class Tcp implements Serializable {
 
     private Boolean enable = false;
     private Integer port = 8090;
-    private Integer maxThreads = Runtime.getRuntime().availableProcessors() * 2;
-    private String targetHost = "127.0.0.1";
-    private Integer targetPort = 8080;
+    //最大使用的eventloop线程数
+    private Integer maxThreads = 1;
+    // 目标host
+    private String targetHost = "reqres.in";
+    // 目标端口
+    private Integer targetPort = 443;
 
 }

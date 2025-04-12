@@ -15,11 +15,9 @@ import java.util.Collections;
 
 public class ReverseHttpProxyVerticle extends AbstractVerticle {
 
-    private final int port;
     private final Http http;
 
-    public ReverseHttpProxyVerticle(int port, Http http) {
-        this.port = port;
+    public ReverseHttpProxyVerticle(Http http) {
         this.http = http;
     }
 
@@ -44,7 +42,7 @@ public class ReverseHttpProxyVerticle extends AbstractVerticle {
         ReverseHttpProxy httpProxy = ReverseHttpProxy.create(router,
                         vertx.createHttpServer(httpServerOptions),
                         vertx.createHttpClient(httpClientOptions, poolOptions))
-                .port(port);
+                .port(http.getPort());
         for (int i = 0, order = Integer.MAX_VALUE; i < http.getRouters().size(); i++, order--) {
             top.meethigher.proxy.model.Router r = http.getRouters().get(i);
             ProxyRoute proxyRoute = new ProxyRoute()

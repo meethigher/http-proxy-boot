@@ -11,10 +11,8 @@ import io.vertx.core.json.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
-import top.meethigher.proxy.model.Http;
-import top.meethigher.proxy.model.Reverse;
-import top.meethigher.proxy.model.Router;
-import top.meethigher.proxy.model.Tcp;
+import top.meethigher.proxy.model.*;
+import top.meethigher.proxy.tcp.tunnel.ReverseTcpProxyTunnelClient;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -34,19 +32,39 @@ public class Utils {
 
     private volatile static Vertx vertx;
 
-    public static void registerReverseHttpProxy(Vertx vertx, Http http) {
+    public static void registerReverseHttpProxy(Http http) {
         for (int i = 0; i < http.getMaxThreads(); i++) {
-            vertx.deployVerticle(new ReverseHttpProxyVerticle(http.getPort(), http)).onFailure(e -> {
+            vertx().deployVerticle(new ReverseHttpProxyVerticle(http)).onFailure(e -> {
                 log.error("deploy reverse http proxy failed", e);
                 System.exit(1);
             });
         }
     }
 
-    public static void registerReverseTcpProxy(Vertx vertx, Tcp tcp) {
+    public static void registerReverseTcpProxy(Tcp tcp) {
         for (int i = 0; i < tcp.getMaxThreads(); i++) {
-            vertx.deployVerticle(new ReverseTcpProxyVerticle(tcp.getPort(), tcp)).onFailure(e -> {
+            vertx().deployVerticle(new ReverseTcpProxyVerticle(tcp)).onFailure(e -> {
                 log.error("deploy reverse tcp proxy failed", e);
+                System.exit(1);
+            });
+        }
+    }
+
+    public static void registerReverseTcpProxyTunnelClient(TunnelClient tc) {
+        ReverseTcpProxyTunnelClient.create(vertx(), vertx().createNetClient(), tc.getMinDelay(), tc.getMaxDelay(),
+                        tc.getSecret())
+                .backendPort(tc.getBackendPort())
+                .backendHost(tc.getBackendHost())
+                .dataProxyName(tc.getDataProxyName())
+                .dataProxyHost(tc.getDataProxyHost())
+                .dataProxyPort(tc.getDataProxyPort())
+                .connect(tc.getHost(), tc.getPort());
+    }
+
+    public static void registerReverseTcpProxyTunnelServer(TunnelServer server) {
+        for (int i = 0; i < server.getMaxThreads(); i++) {
+            vertx().deployVerticle(new ReverseTcpProxyTunnelServerVerticle(server)).onFailure(e -> {
+                log.error("deplay reverse tcp tunnel server failed", e);
                 System.exit(1);
             });
         }

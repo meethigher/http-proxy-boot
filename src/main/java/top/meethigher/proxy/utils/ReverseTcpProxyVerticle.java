@@ -6,18 +6,17 @@ import top.meethigher.proxy.tcp.ReverseTcpProxy;
 
 public class ReverseTcpProxyVerticle extends AbstractVerticle {
 
-    private final int port;
     private final Tcp tcp;
 
-    public ReverseTcpProxyVerticle(int port, Tcp tcp) {
-        this.port = port;
+    public ReverseTcpProxyVerticle(Tcp tcp) {
+
         this.tcp = tcp;
     }
 
     @Override
     public void start() throws Exception {
         ReverseTcpProxy.create(vertx, tcp.getTargetHost(), tcp.getTargetPort())
-                .port(port)
+                .port(tcp.getPort())
                 .start();
     }
 }
