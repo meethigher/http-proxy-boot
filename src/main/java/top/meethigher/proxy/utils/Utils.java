@@ -8,11 +8,13 @@ import io.vertx.core.VertxOptions;
 import io.vertx.core.dns.AddressResolverOptions;
 import io.vertx.core.http.*;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.net.NetSocket;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 import top.meethigher.proxy.model.*;
 import top.meethigher.proxy.tcp.tunnel.ReverseTcpProxyTunnelClient;
+import top.meethigher.proxy.tcp.tunnel.ReverseTcpProxyTunnelServer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,6 +24,7 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 
 @Slf4j
@@ -62,8 +65,9 @@ public class Utils {
     }
 
     public static void registerReverseTcpProxyTunnelServer(TunnelServer server) {
+        final ConcurrentHashMap<NetSocket, ReverseTcpProxyTunnelServer.DataProxyServer> authedSockets = new ConcurrentHashMap<>();
         for (int i = 0; i < server.getMaxThreads(); i++) {
-            vertx().deployVerticle(new ReverseTcpProxyTunnelServerVerticle(server)).onFailure(e -> {
+            vertx().deployVerticle(new ReverseTcpProxyTunnelServerVerticle(server, authedSockets)).onFailure(e -> {
                 log.error("deplay reverse tcp tunnel server failed", e);
                 System.exit(1);
             });

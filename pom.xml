@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>top.meethigher</groupId>
     <artifactId>http-proxy-boot</artifactId>
-    <version>3.0.1</version>
+    <version>3.0.2</version>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -14,7 +14,7 @@
         <stack.version>4.5.10</stack.version>
         <slf4j.version>1.7.32</slf4j.version>
         <logback.version>1.2.13</logback.version>
-        <tcp-reverse-proxy.version>1.0.3</tcp-reverse-proxy.version>
+        <tcp-reverse-proxy.version>1.0.4</tcp-reverse-proxy.version>
         <lombok.version>1.18.12</lombok.version>
     </properties>
 
