@@ -16,7 +16,7 @@ public class Router  implements Serializable {
     private Boolean followRedirects = true;
     private Boolean httpKeepAlive = true;
     private Boolean logEnable = true;
-    private String logFormat = "{name} -- {serverHttpVersion} -- {clientHttpVersion} -- {method} -- {userAgent} -- {serverRemoteAddr} -- {clientLocalAddr} -- {sourceUri} -- {proxyUrl} -- {statusCode} -- consumed {consumedMills} ms";
+    private String logFormat = "{name} -- {serverHttpVersion} -- {clientHttpVersion} -- {method} -- {userAgent} -- {serverRemoteAddr} -- {serverLocalAddr} -- {clientLocalAddr} -- {clientRemoteAddr} -- {sourceUri} -- {proxyUrl} -- {statusCode} -- consumed {consumedMills} ms";
     private Boolean corsControl = false;
     private Boolean corsAllow = true;
 

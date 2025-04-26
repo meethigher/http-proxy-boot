@@ -83,7 +83,7 @@ reverse:
         # 记录http日志，日志格式由logFormat参数决定
         logEnable: true
         # 日志格式，当logEnable开启时生效。用花括号引起来，表示关键字。关键字可选，格式支持自定义
-        logFormat: "{name} -- {serverHttpVersion} -- {clientHttpVersion} -- {method} -- {userAgent} -- {serverRemoteAddr} -- {clientLocalAddr} -- {sourceUri} -- {proxyUrl} -- {statusCode} -- consumed {consumedMills} ms"
+        logFormat: "{name} -- {serverHttpVersion} -- {clientHttpVersion} -- {method} -- {userAgent} -- {serverRemoteAddr} -- {serverLocalAddr} -- {clientLocalAddr} -- {clientRemoteAddr} -- {sourceUri} -- {proxyUrl} -- {statusCode} -- consumed {consumedMills} ms"
         # 由代理服务管理跨域。当该参数为true时，是否允许跨域由allowCors决定
         corsControl: false
         # 是否允许跨域。当corsControl开启时生效
