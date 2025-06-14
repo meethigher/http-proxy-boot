@@ -21,6 +21,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -32,6 +33,8 @@ public class Utils {
 
 
     private static final String CONFIG_FILE_NAME = "application.yml";
+
+    private static final String CONFIG_EXAMPLE_FILE_NAME = "application-full.yml";
 
     private volatile static Vertx vertx;
 
@@ -79,6 +82,7 @@ public class Utils {
         // 优先加载外部配置文件，其次加载类路径下配置文件
         String userDirPath = System.getProperty("user.dir").replace("\\", "/");
         File file = new File(userDirPath, CONFIG_FILE_NAME);
+        File exampleFile = new File(userDirPath, CONFIG_EXAMPLE_FILE_NAME);
         Map<String, Object> map = null;
         if (file.exists()) {
             try (FileInputStream fis = new FileInputStream(file)) {
@@ -94,6 +98,16 @@ public class Utils {
                 log.error("load internal config file error", e);
             }
             log.info("load internal config file {}", CONFIG_FILE_NAME);
+            try (InputStream is = Utils.class.getClassLoader().getResourceAsStream(CONFIG_FILE_NAME);
+                 InputStream eIs = Utils.class.getClassLoader().getResourceAsStream(CONFIG_EXAMPLE_FILE_NAME)) {
+                // 若外部配置文件不存在，则将内部配置文件向外部复制一份。
+                Files.copy(is, file.toPath());
+                Files.copy(eIs, exampleFile.toPath());
+            } catch (Exception e) {
+                log.error("create config file error", e);
+            }
+            log.info("create config file {}, example config file {}", file.getAbsoluteFile(),
+                    exampleFile.getAbsoluteFile());
         }
         return map;
     }
@@ -116,7 +130,8 @@ public class Utils {
             String userDirPath = System.getProperty("user.dir").replace("\\", "/");
             File file = new File(userDirPath, logConfigFile);
             URL configFile = null;
-            if (file.exists()) {
+            boolean exists = file.exists();
+            if (exists) {
                 configFile = file.toURI().toURL();
             } else {
                 configFile = Utils.class.getClassLoader().getResource(logConfigFile);
@@ -129,8 +144,17 @@ public class Utils {
             JoranConfigurator configurator = new JoranConfigurator();
             configurator.setContext(context);
             configurator.doConfigure(configFile);
-
-            log.info("Logback configuration loaded successfully: " + logConfigFile);
+            if (exists) {
+                log.info("logback configuration loaded successfully: {}", file.getAbsoluteFile());
+            } else {
+                log.info("logback configuration loaded successfully: {}", logConfigFile);
+                try (InputStream is = Utils.class.getClassLoader().getResourceAsStream(logConfigFile)) {
+                    Files.copy(is, file.toPath());
+                } catch (Exception e) {
+                    log.error("create log config file error", e);
+                }
+                log.info("create log config file {}", file.getAbsoluteFile());
+            }
         } catch (Exception e) {
             throw new RuntimeException("Failed to load Logback configuration", e);
         }
