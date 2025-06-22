@@ -10,6 +10,7 @@ import top.meethigher.proxy.http.ProxyRoute;
 import top.meethigher.proxy.http.ReverseHttpProxy;
 import top.meethigher.proxy.model.Http;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -25,17 +26,21 @@ public class ReverseHttpProxyVerticle extends AbstractVerticle {
     public void start() throws Exception {
         Router router = Router.router(vertx);
         HttpClientOptions httpClientOptions = new HttpClientOptions()
-                .setTrustAll(true)
-                .setVerifyHost(false)
-                // httpclient支持与后端服务进行协商使用使用http2
+                // 设置客户端默认使用的HTTP协议版本是http1.1，并且开启alpn支持协商http1.1和http2Add commentMore actions
+                // alpn基于tls，若对方没有开启tls，则不支持alpn
+                .setProtocolVersion(HttpVersion.HTTP_1_1)
                 .setUseAlpn(true)
-                .setProtocolVersion(HttpVersion.HTTP_2);
+                .setAlpnVersions(new ArrayList<HttpVersion>() {{
+                    add(HttpVersion.HTTP_1_1);
+                    add(HttpVersion.HTTP_2);
+                }});
         PoolOptions poolOptions = new PoolOptions()
                 .setHttp1MaxSize(http.getHttp1MaxSize())
                 .setHttp2MaxSize(http.getHttp2MaxSize());
         HttpServerOptions httpServerOptions = new HttpServerOptions()
-                // 服务端支持与客户端进行协商，使用h2c（HTTP/2 cleartext）
-                // 常规情况下，h2只在开启了tls使用。如果不开启tls，需要指定使用的是h2c
+                // 服务端支持与客户端进行协商，支持通过alpn用于协商客户端和服务端使用http1.1还是http2
+                // 开启h2c，使其支持http2，默认情况下http2只在开启了tls使用。如果不开启tls还想使用http2，那么需要开启h2c
+                // alpn基于tls，若未开启tls，则不支持alpn
                 .setAlpnVersions(Collections.unmodifiableList(Arrays.asList(HttpVersion.HTTP_1_1, HttpVersion.HTTP_2)))
                 .setUseAlpn(true)
                 .setHttp2ClearTextEnabled(true);
