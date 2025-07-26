@@ -5,7 +5,7 @@ import lombok.Data;
 import java.io.Serializable;
 
 @Data
-public class TunnelServer implements Serializable {
+public class TcpTunnelServer implements Serializable {
 
     private Boolean enable = false;
     // 控制服务监听地址

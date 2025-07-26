@@ -27,8 +27,8 @@ public class App {
         Reverse reverse = loadApplicationConfig();
         Tcp tcp = reverse.getTcp();
         Http http = reverse.getHttp();
-        TunnelClient tc = reverse.getTunnelClient();
-        TunnelServer ts = reverse.getTunnelServer();
+        TcpTunnelClient tc = reverse.getTcpTunnelClient();
+        TcpTunnelServer ts = reverse.getTcpTunnelServer();
         final Logger log = LoggerFactory.getLogger(App.class);
         if (tcp.getEnable()) {
             log.info("current mode: ReverseTcpProxy");

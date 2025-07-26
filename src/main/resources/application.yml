@@ -1,8 +1,13 @@
+# 反向代理。支持多种模式，只能启用一种模式
 reverse:
-  http:
+  # tcp反向代理
+  tcp:
     enable: true
-    port: 80
-    routers:
-      - name: proxy
-        sourceUrl: /*
-        targetUrl: https://meethigher.top
+    port: 8080
+    # 最大使用的线程数
+    maxThreads: 1
+    # 目标后端地址，支持多个，采用轮询策略。格式host:port
+    targets:
+      - 127.0.0.1:3306
+      - 127.0.0.1:5432
+      - 127.0.0.1:1521

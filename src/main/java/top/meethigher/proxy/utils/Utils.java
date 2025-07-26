@@ -12,7 +12,9 @@ import io.vertx.core.net.NetSocket;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
+import top.meethigher.proxy.NetAddress;
 import top.meethigher.proxy.model.*;
+import top.meethigher.proxy.tcp.TcpRoundRobinLoadBalancer;
 import top.meethigher.proxy.tcp.tunnel.ReverseTcpProxyTunnelClient;
 import top.meethigher.proxy.tcp.tunnel.ReverseTcpProxyTunnelServer;
 
@@ -22,9 +24,7 @@ import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 
@@ -48,15 +48,27 @@ public class Utils {
     }
 
     public static void registerReverseTcpProxy(Tcp tcp) {
+        List<String> targets = tcp.getTargets();
+        List<NetAddress> nodes = new ArrayList<>();
+        for (String target : targets) {
+            try {
+                String[] addr = target.split(":");
+                nodes.add(new NetAddress(addr[0], Integer.parseInt(addr[1])));
+            } catch (Exception e) {
+                log.error("tcp targets format is incorrect. The correct format is host:port.");
+                System.exit(1);
+            }
+        }
+        TcpRoundRobinLoadBalancer lb = TcpRoundRobinLoadBalancer.create(nodes);
         for (int i = 0; i < tcp.getMaxThreads(); i++) {
-            vertx().deployVerticle(new ReverseTcpProxyVerticle(tcp)).onFailure(e -> {
+            vertx().deployVerticle(new ReverseTcpProxyVerticle(lb, nodes,tcp.getPort())).onFailure(e -> {
                 log.error("deploy reverse tcp proxy failed", e);
                 System.exit(1);
             });
         }
     }
 
-    public static void registerReverseTcpProxyTunnelClient(TunnelClient tc) {
+    public static void registerReverseTcpProxyTunnelClient(TcpTunnelClient tc) {
         ReverseTcpProxyTunnelClient.create(vertx(), vertx().createNetClient(), tc.getMinDelay(), tc.getMaxDelay(),
                         tc.getSecret())
                 .backendPort(tc.getBackendPort())
@@ -67,7 +79,7 @@ public class Utils {
                 .connect(tc.getHost(), tc.getPort());
     }
 
-    public static void registerReverseTcpProxyTunnelServer(TunnelServer server) {
+    public static void registerReverseTcpProxyTunnelServer(TcpTunnelServer server) {
         final ConcurrentHashMap<NetSocket, ReverseTcpProxyTunnelServer.DataProxyServer> authedSockets = new ConcurrentHashMap<>();
         for (int i = 0; i < server.getMaxThreads(); i++) {
             vertx().deployVerticle(new ReverseTcpProxyTunnelServerVerticle(server, authedSockets)).onFailure(e -> {

@@ -5,7 +5,7 @@ import lombok.Data;
 import java.io.Serializable;
 
 @Data
-public class TunnelClient implements Serializable {
+public class TcpTunnelClient implements Serializable {
 
     private Boolean enable = false;
     // 失败重连最小延迟，单位毫秒
