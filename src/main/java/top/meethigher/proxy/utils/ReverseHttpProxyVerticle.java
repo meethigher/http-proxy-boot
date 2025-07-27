@@ -13,6 +13,7 @@ import top.meethigher.proxy.model.Http;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 
 public class ReverseHttpProxyVerticle extends AbstractVerticle {
 
@@ -26,6 +27,10 @@ public class ReverseHttpProxyVerticle extends AbstractVerticle {
     public void start() throws Exception {
         Router router = Router.router(vertx);
         HttpClientOptions httpClientOptions = new HttpClientOptions()
+                .setTcpKeepAlive(http.clientTcpKeepAlive)
+                .setIdleTimeout(http.clientIdleTimeout)
+                .setIdleTimeoutUnit(TimeUnit.MILLISECONDS)
+                .setKeepAliveTimeout(http.clientHttpKeepAliveTimeout)
                 // 设置客户端默认使用的HTTP协议版本是http1.1，并且开启alpn支持协商http1.1和http2Add commentMore actions
                 // alpn基于tls，若对方没有开启tls，则不支持alpn
                 .setProtocolVersion(HttpVersion.HTTP_1_1)
@@ -38,6 +43,9 @@ public class ReverseHttpProxyVerticle extends AbstractVerticle {
                 .setHttp1MaxSize(http.http1MaxSize)
                 .setHttp2MaxSize(http.http2MaxSize);
         HttpServerOptions httpServerOptions = new HttpServerOptions()
+                .setTcpKeepAlive(http.serverTcpKeepAlive)
+                .setIdleTimeout(http.serverIdleTimeout)
+                .setIdleTimeoutUnit(TimeUnit.MILLISECONDS)
                 // 服务端支持与客户端进行协商，支持通过alpn用于协商客户端和服务端使用http1.1还是http2
                 // 开启h2c，使其支持http2，默认情况下http2只在开启了tls使用。如果不开启tls还想使用http2，那么需要开启h2c
                 // alpn基于tls，若未开启tls，则不支持alpn
@@ -47,7 +55,8 @@ public class ReverseHttpProxyVerticle extends AbstractVerticle {
         ReverseHttpProxy httpProxy = ReverseHttpProxy.create(router,
                         vertx.createHttpServer(httpServerOptions),
                         vertx.createHttpClient(httpClientOptions, poolOptions))
-                .port(http.port);
+                .port(http.port)
+                .host(http.host);
         for (int i = 0, order = Integer.MAX_VALUE; i < http.routers.size(); i++, order--) {
             top.meethigher.proxy.model.Router r = http.routers.get(i);
             ProxyRoute proxyRoute = new ProxyRoute()

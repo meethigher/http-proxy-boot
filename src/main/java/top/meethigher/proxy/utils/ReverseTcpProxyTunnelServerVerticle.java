@@ -25,8 +25,9 @@ public class ReverseTcpProxyTunnelServerVerticle extends AbstractVerticle {
         ReverseTcpProxyTunnelServer.create(
                         vertx,
                         vertx.createNetServer(new NetServerOptions()
+                                .setTcpKeepAlive(ts.serverTcpKeepAlive)
                                 .setIdleTimeoutUnit(TimeUnit.MILLISECONDS)
-                                .setIdleTimeout(ts.idleTimeout)),
+                                .setIdleTimeout(ts.serverIdleTimeout)),
                         ts.secret,
                         authedSockets)
                 .heartbeatDelay(ts.heartbeatDelay)

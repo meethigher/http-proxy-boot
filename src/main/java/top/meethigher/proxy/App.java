@@ -6,7 +6,6 @@ import top.meethigher.proxy.model.*;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
-import java.util.concurrent.Callable;
 
 import static top.meethigher.proxy.utils.Utils.*;
 
@@ -37,12 +36,6 @@ public class App {
             registerReverseTcpProxy(tcp);
         } else if (http.enable) {
             log.info("current mode: ReverseHttpProxy");
-            if (http.preheatDns) {
-                vertx().executeBlocking((Callable<Void>) () -> {
-                    preheatDns(http);
-                    return null;
-                });
-            }
             registerReverseHttpProxy(http);
         } else if (tc.enable) {
             log.info("current mode: ReverseTcpProxyTunnelClient");
@@ -57,7 +50,7 @@ public class App {
             log.info("current mode: ReverseTcpProxyMuxServer");
             registerReverseTcpProxyMuxServer(ms);
         } else {
-            throw new IllegalArgumentException("you need to enable one model");
+            throw new IllegalArgumentException("you need to enable one mode");
         }
     }
 

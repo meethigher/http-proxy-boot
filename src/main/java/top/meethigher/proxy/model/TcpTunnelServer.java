@@ -8,7 +8,8 @@ public class TcpTunnelServer {
     public String secret = "hello,meethigher";
     public Integer judgeDelay = 300;
     public Integer heartbeatDelay = 30000;
-    public Integer idleTimeout = 60000;
+    public Boolean serverTcpKeepAlive = false;
+    public Integer serverIdleTimeout = 0;
     public Integer maxThreads = 1;
 
 }

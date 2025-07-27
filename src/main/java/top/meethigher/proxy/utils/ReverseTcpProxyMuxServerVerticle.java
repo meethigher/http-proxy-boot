@@ -21,10 +21,15 @@ public class ReverseTcpProxyMuxServerVerticle extends AbstractVerticle {
     @Override
     public void start() throws Exception {
         NetServer netServer = vertx.createNetServer(
-                new NetServerOptions().setIdleTimeout(muxServer.serverIdleTimeout).setIdleTimeoutUnit(TimeUnit.MILLISECONDS)
+                new NetServerOptions()
+                        .setTcpKeepAlive(muxServer.serverTcpKeepAlive)
+                        .setIdleTimeout(muxServer.serverIdleTimeout).setIdleTimeoutUnit(TimeUnit.MILLISECONDS)
         );
         NetClient netClient = vertx.createNetClient(
-                new NetClientOptions().setIdleTimeout(muxServer.clientIdleTimeout).setIdleTimeoutUnit(TimeUnit.MILLISECONDS)
+                new NetClientOptions()
+                        .setTcpKeepAlive(muxServer.clientTcpKeepAlive)
+                        .setConnectTimeout(muxServer.clientConnectTimeout)
+                        .setIdleTimeout(muxServer.clientIdleTimeout).setIdleTimeoutUnit(TimeUnit.MILLISECONDS)
         );
         ReverseTcpProxyMuxServer.create(vertx, muxServer.secret, netServer, netClient)
                 .host(muxServer.host)

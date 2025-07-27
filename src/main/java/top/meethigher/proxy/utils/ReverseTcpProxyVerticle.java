@@ -28,8 +28,12 @@ public class ReverseTcpProxyVerticle extends AbstractVerticle {
 
     @Override
     public void start() throws Exception {
-        NetServerOptions netServerOptions = new NetServerOptions().setIdleTimeout(tcp.serverIdleTimeout).setIdleTimeoutUnit(TimeUnit.MILLISECONDS);
-        NetClientOptions netClientOptions = new NetClientOptions().setIdleTimeout(tcp.clientIdleTimeout).setIdleTimeoutUnit(TimeUnit.MILLISECONDS);
+        NetServerOptions netServerOptions = new NetServerOptions()
+                .setTcpKeepAlive(tcp.serverTcpKeepAlive)
+                .setIdleTimeout(tcp.serverIdleTimeout).setIdleTimeoutUnit(TimeUnit.MILLISECONDS);
+        NetClientOptions netClientOptions = new NetClientOptions()
+                .setTcpKeepAlive(tcp.clientTcpKeepAlive)
+                .setConnectTimeout(tcp.clientConnectTimeout).setIdleTimeout(tcp.clientIdleTimeout).setIdleTimeoutUnit(TimeUnit.MILLISECONDS);
         NetServer netServer = vertx.createNetServer(netServerOptions);
         NetClient netClient = vertx.createNetClient(netClientOptions);
         String name = ReverseTcpProxy.generateName();

@@ -9,8 +9,11 @@
 
 使用方式
 
-```java
+```sh
 java -jar http-proxy-boot.jar
+
+# 默认使用netty的dns解析器，若想换成jdk内置的dns解析，使用如下命令启动
+java -Dvertx.disableDnsResolver=true -jar http-proxy-boot.jar
 ```
 
 配置文件 application.yml 示例
@@ -27,10 +30,16 @@ reverse:
     port: 44444
     # 鉴权密钥
     secret: hello,meethigher
-    # 服务端连接空闲超时，单位毫秒。0表示永不超时
+    # true表示服务端开启TcpKeepAlive，即定期发送探测报文
+    serverTcpKeepAlive: false
+    # true表示客户端开启TcpKeepAlive，即定期发送探测报文
+    clientTcpKeepAlive: false
+    # 服务端TCP连接空闲超时，单位毫秒。0表示永不超时
     serverIdleTimeout: 0
-    # 客户端连接空闲超时，单位毫秒。0表示永不超时
+    # 客户端TCP连接空闲超时，单位毫秒。0表示永不超时
     clientIdleTimeout: 0
+    # 客户端TCP请求超时时间，单位毫秒。0表示永不超时
+    clientConnectTimeout: 0
     # 最大使用线程数
     maxThreads: 1
     # 经过muxServer转发出来的服务，格式:`name-localHost:localPort-backendHost:backendPort`
@@ -44,10 +53,16 @@ reverse:
     port: 44444
     # 鉴权密钥
     secret: hello,meethigher
-    # 服务端连接空闲超时，单位毫秒。0表示永不超时
+    # true表示服务端开启TcpKeepAlive，即定期发送探测报文
+    serverTcpKeepAlive: false
+    # true表示客户端开启TcpKeepAlive，即定期发送探测报文
+    clientTcpKeepAlive: false
+    # 服务端TCP连接空闲超时，单位毫秒。0表示永不超时
     serverIdleTimeout: 0
-    # 客户端连接空闲超时，单位毫秒。0表示永不超时
+    # 客户端TCP连接空闲超时，单位毫秒。0表示永不超时
     clientIdleTimeout: 0
+    # 客户端TCP请求超时时间，单位毫秒。0表示永不超时
+    clientConnectTimeout: 0
     # 最大使用的线程数
     maxThreads: 1
   # tcp内网穿透-Client端
@@ -61,6 +76,12 @@ reverse:
     host: 127.0.0.1
     # 控制服务端口
     port: 44444
+    # true表示客户端开启TcpKeepAlive，即定期发送探测报文
+    clientTcpKeepAlive: false
+    # 客户端TCP连接空闲超时，单位毫秒。0表示永不超时
+    clientIdleTimeout: 0
+    # 客户端TCP请求超时时间，单位毫秒。0表示永不超时
+    clientConnectTimeout: 0
     # 鉴权密钥
     secret: hello,meethigher
     # 穿透后的服务名称
@@ -86,8 +107,10 @@ reverse:
     judgeDelay: 300
     # 心跳间隔。单位毫秒
     heartbeatDelay: 30000
-    # 空闲连接超时。单位毫秒。0表示永不超时
-    idleTimeout: 60000
+    # true表示服务端开启TcpKeepAlive，即定期发送探测报文
+    serverTcpKeepAlive: false
+    # 服务端TCP连接空闲超时，单位毫秒。0表示永不超时
+    serverIdleTimeout: 0
     # 最大使用的线程数
     maxThreads: 1
   # tcp反向代理
@@ -95,10 +118,16 @@ reverse:
     enable: false
     host: 0.0.0.0
     port: 8080
-    # 服务端连接空闲超时，单位毫秒。0表示永不超时
+    # true表示服务端开启TcpKeepAlive，即定期发送探测报文
+    serverTcpKeepAlive: false
+    # true表示客户端开启TcpKeepAlive，即定期发送探测报文
+    clientTcpKeepAlive: false
+    # 服务端TCP连接空闲超时，单位毫秒。0表示永不超时
     serverIdleTimeout: 0
-    # 客户端连接空闲超时，单位毫秒。0表示永不超时
+    # 客户端TCP连接空闲超时，单位毫秒。0表示永不超时
     clientIdleTimeout: 0
+    # 客户端TCP请求超时时间，单位毫秒。0表示永不超时
+    clientConnectTimeout: 0
     # 最大使用的线程数
     maxThreads: 1
     # 目标后端地址，支持多个，采用轮询策略。格式host:port
@@ -109,15 +138,26 @@ reverse:
   # http反向代理
   http:
     enable: false
+    host: 0.0.0.0
     port: 8080
-    # DNS解析预热。当一台机器有多个DNS服务时，建议将该参数开启，可以预热缓存
-    preheatDns: false
     # 最大使用的线程数
     maxThreads: 1
     # http1连接池最大容量
     http1MaxSize: 6000
     # http2连接池最大容量
     http2MaxSize: 2000
+    # true表示服务端开启TcpKeepAlive，即定期发送探测报文
+    serverTcpKeepAlive: false
+    # true表示客户端开启TcpKeepAlive，即定期发送探测报文
+    clientTcpKeepAlive: false
+    # 服务端TCP连接空闲超时，单位毫秒。0表示永不超时
+    serverIdleTimeout: 0
+    # 客户端TCP连接空闲超时，单位毫秒。0表示永不超时
+    clientIdleTimeout: 0
+    # 客户端TCP请求超时时间，单位毫秒。0表示永不超时
+    clientConnectTimeout: 0
+    # 客户端HTTP连接池中未空闲连接超时时间（适用于HTTP1.1和HTTP2）最大存活时间，单位秒。0表示永不超时
+    clientHttpKeepAliveTimeout: 60
     # 代理路由
     # 路由配置越靠后，优先级越高
     routers:

@@ -2,11 +2,9 @@ package top.meethigher.proxy.utils;
 
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
-import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.dns.AddressResolverOptions;
-import io.vertx.core.http.*;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.NetSocket;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +14,6 @@ import top.meethigher.proxy.NetAddress;
 import top.meethigher.proxy.model.*;
 import top.meethigher.proxy.tcp.TcpRoundRobinLoadBalancer;
 import top.meethigher.proxy.tcp.mux.model.MuxNetAddress;
-import top.meethigher.proxy.tcp.tunnel.ReverseTcpProxyTunnelClient;
 import top.meethigher.proxy.tcp.tunnel.ReverseTcpProxyTunnelServer;
 
 import java.io.File;
@@ -25,9 +22,11 @@ import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
 
 @Slf4j
 public class Utils {
@@ -102,14 +101,10 @@ public class Utils {
     }
 
     public static void registerReverseTcpProxyTunnelClient(TcpTunnelClient tc) {
-        ReverseTcpProxyTunnelClient.create(vertx(), vertx().createNetClient(), tc.minDelay, tc.maxDelay,
-                        tc.secret)
-                .backendPort(tc.backendPort)
-                .backendHost(tc.backendHost)
-                .dataProxyName(tc.dataProxyName)
-                .dataProxyHost(tc.dataProxyHost)
-                .dataProxyPort(tc.dataProxyPort)
-                .connect(tc.host, tc.port);
+        vertx().deployVerticle(new ReverseTcpProxyTunnelClientVerticle(tc)).onFailure(e -> {
+            log.error("deplay reverse tcp tunnel client failed", e);
+            System.exit(1);
+        });
     }
 
     public static void registerReverseTcpProxyTunnelServer(TcpTunnelServer server) {
@@ -213,6 +208,9 @@ public class Utils {
                 if (vertx == null) {
                     VertxOptions options = new VertxOptions()
                             .setAddressResolverOptions(new AddressResolverOptions()
+                                    // 该参数默认是永不刷新，也就是hosts内容，程序缓存后永不更新。此处配置每5秒更新
+                                    // @see https://github.com/eclipse-vertx/vert.x/pull/4843
+                                    .setHostsRefreshPeriod(5)
                                     .setQueryTimeout(2000))
                             .setUseDaemonThread(false);
                     vertx = Vertx.vertx(options);
@@ -235,50 +233,6 @@ public class Utils {
             } catch (Exception e) {
                 return domain;
             }
-        }
-    }
-
-
-    /**
-     * netty的dns解析是顺序解析的，若dns有一个存在问题，会导致整体响应变慢。因此需要预热成ip地址
-     * 参考https://github.com/meethigher/bug-test/tree/vertx-http-dns
-     */
-    public static void preheatDns(Http http) {
-        log.info("preheat dns start");
-        long startTimestamp = System.currentTimeMillis();
-        HttpClient httpClient = vertx().createHttpClient(new HttpClientOptions().setVerifyHost(false).setTrustAll(true));
-        try {
-            Set<String> domains = new HashSet<>();
-            for (Router router : http.routers) {
-                try {
-                    String targetUrl = router.targetUrl;
-                    String host = new URL(targetUrl).getHost();
-                    if (IPv4Validator.isIPv4Address(host)) {
-                        continue;
-                    }
-                    domains.add(host);
-                } catch (Exception e) {
-                }
-            }
-            CountDownLatch countDownLatch = new CountDownLatch(domains.size());
-            log.info("{} domains need to preheat", domains.size());
-            for (String domain : domains) {
-                Future<HttpClientRequest> requestFuture = httpClient.request(new RequestOptions().setHost(domain).setSsl(false).setMethod(HttpMethod.HEAD));
-                requestFuture.compose(HttpClientRequest::send).onSuccess(t -> {
-                    log.info("{} preheat dns success", domain);
-                    countDownLatch.countDown();
-                }).onFailure(throwable -> {
-                    log.error("{} preheat dns failure", domain);
-                    countDownLatch.countDown();
-                });
-            }
-            countDownLatch.await();
-            httpClient.close();
-        } catch (Exception e) {
-            log.error("preheat dns failure", e);
-        } finally {
-            httpClient.close();
-            log.info("preheat dns end, consumed {} ms", System.currentTimeMillis() - startTimestamp);
         }
     }
 
