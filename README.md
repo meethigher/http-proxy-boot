@@ -1,115 +1,19 @@
-支持功能如下
+使用 Java 实现的 HTTP 与 TCP 反向代理工具。Java 本身支持跨平台，因此相对 Nginx 来说，在各种平台上进行测试会更方便。这是我编写该工具的初心。
 
-1. HTTP反向代理
-2. TCP反向代理
-3. TCP内网穿透
+目前有三套分支
 
-下载[Releases · meethigher/http-proxy-boot](https://github.com/meethigher/http-proxy-boot/releases)
+1. [1.x](https://github.com/meethigher/http-proxy-boot/tree/1.x)
 
-使用方式
+   * 特点：BIO
+   * 说明：借鉴 [开源 HTTP-Proxy-Servlet](https://github.com/mitre/HTTP-Proxy-Servlet)，使用 okhttp3 和 javax.servlet-api 实现的 [proxy-servlet](https://github.com/meethigher/proxy-servlet)
+2. [2.x](https://github.com/meethigher/http-proxy-boot/tree/2.x)
 
-```java
-java -jar http-proxy-boot.jar
-```
+   * 特点：NIO
+   * 说明：使用 [vert.x](https://vertx.io/) 实现的[tcp-reverse-proxy](https://github.com/meethigher/tcp-reverse-proxy)
 
-配置文件 application.yml 示例
+3. [3.x](https://github.com/meethigher/http-proxy-boot/tree/3.x)
 
-```yml
-# 反向代理。支持多种模式，只能启用一种模式
-reverse:
-  # tcp内网穿透-Client端
-  tunnelClient:
-    enable: false
-    # 失败重连最小延迟，单位毫秒
-    minDelay: 1000
-    # 失败重连最大延迟，单位毫秒
-    maxDelay: 64000
-    # 控制服务地址
-    host: 127.0.0.1
-    # 控制服务端口
-    port: 44444
-    # 鉴权密钥
-    secret: 0123456789
-    # 穿透后的服务名称
-    dataProxyName: ssh-proxy
-    # 穿透后的服务地址
-    dataProxyHost: 127.0.0.1
-    # 穿透后的服务端口
-    dataProxyPort: 22
-    # 需要穿透的后端服务地址
-    backendHost: meethigher.top
-    # 需要穿透的后端端口
-    backendPort: 22
-  # tcp内网穿透-Server端
-  tunnelServer:
-    enable: false
-    # 控制服务监听地址
-    host: 0.0.0.0
-    # 控制服务监听端口
-    port: 44444
-    # 鉴权密钥
-    secret: 0123456789
-    # 连接类型的延迟判定，在弱网情况下，该参数需要调大。单位毫秒
-    judgeDelay: 2000
-    # 心跳间隔。单位毫秒
-    heartbeatDelay: 30000
-    # 空闲连接超时端口。单位毫秒。该值要比心跳值要大方可
-    idleTimeout: 60000
-    # 最大使用的eventloop线程数
-    maxThreads: 1
-  # tcp反向代理
-  tcp:
-    enable: false
-    port: 8080
-    # 最大使用的eventloop线程数
-    maxThreads: 1
-    # 目标host
-    targetHost: reqres.in
-    # 目标端口
-    targetPort: 443
-  # http反向代理
-  http:
-    enable: false
-    port: 8080
-    # DNS解析预热。当一台机器有多个DNS服务时，建议将该参数开启，可以预热缓存
-    preheatDns: false
-    # 最大使用的eventloop线程数
-    maxThreads: 1
-    # 单个eventloop最大可以处理的http1请求
-    http1MaxSize: 6000
-    # 单个eventloop最大可以处理的http2请求
-    http2MaxSize: 2000
-    # 代理路由
-    # 路由配置越靠后，优先级越高
-    routers:
-      - name: route1
-        # 代理路径。支持单路径匹配（如 /test ）、多路径匹配（如 /* ）
-        sourceUrl: /*
-        # 代理目标地址
-        targetUrl: https://reqres.in
-        # 转发客户端请求IP与协议
-        forwardIp: false
-        # 保留响应头的Cookie与SetCookie
-        preserveCookies: true
-        # 保留请求头的Host
-        preserveHost: false
-        # 跟随跳转
-        followRedirects: true
-        # 代理服务内部请求是否使用keepalive长连接
-        httpKeepAlive: true
-        # 记录http日志，日志格式由logFormat参数决定
-        logEnable: true
-        # 日志格式，当logEnable开启时生效。用花括号引起来，表示关键字。关键字可选，格式支持自定义
-        logFormat: "{name} -- {serverHttpVersion} -- {clientHttpVersion} -- {method} -- {userAgent} -- {serverRemoteAddr} -- {clientLocalAddr} -- {sourceUri} -- {proxyUrl} -- {statusCode} -- consumed {consumedMills} ms"
-        # 由代理服务管理跨域。当该参数为true时，是否允许跨域由allowCors决定
-        corsControl: false
-        # 是否允许跨域。当corsControl开启时生效
-        corsAllow: true
-      - name: route2
-        sourceUrl: /test/*
-        targetUrl: https://meethigher.top
-      - name: route3
-        sourceUrl: /static/*
-        targetUrl: static:D:/3Develop/www
-```
+   * 特点：NIO
+   * 说明：在 2.x 的基础上，脱离了依赖 springboot，更轻量
 
+   
