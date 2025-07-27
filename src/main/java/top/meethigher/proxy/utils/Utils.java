@@ -15,6 +15,7 @@ import org.yaml.snakeyaml.Yaml;
 import top.meethigher.proxy.NetAddress;
 import top.meethigher.proxy.model.*;
 import top.meethigher.proxy.tcp.TcpRoundRobinLoadBalancer;
+import top.meethigher.proxy.tcp.mux.model.MuxNetAddress;
 import top.meethigher.proxy.tcp.tunnel.ReverseTcpProxyTunnelClient;
 import top.meethigher.proxy.tcp.tunnel.ReverseTcpProxyTunnelServer;
 
@@ -38,8 +39,40 @@ public class Utils {
 
     private volatile static Vertx vertx;
 
+
+    public static void registerReverseTcpProxyMuxClient(TcpMuxClient muxClient) {
+        Map<MuxNetAddress, NetAddress> map = new LinkedHashMap<>();
+        try {
+            for (String service : muxClient.services) {
+                String[] arr = service.split("-");
+                NetAddress local = NetAddress.parse(arr[1]);
+                MuxNetAddress muxNetAddress = new MuxNetAddress(local.getHost(), local.getPort(), arr[0]);
+                NetAddress backend = NetAddress.parse(arr[2]);
+                map.put(muxNetAddress, backend);
+            }
+        } catch (Exception e) {
+            log.error("parsing from {} occurred exception", CONFIG_FILE_NAME, e);
+            System.exit(1);
+        }
+        for (int i = 0; i < muxClient.maxThreads; i++) {
+            vertx().deployVerticle(new ReverseTcpProxyMuxClientVerticle(muxClient, map)).onFailure(e -> {
+                log.error("deploy tcp mux client failed", e);
+                System.exit(1);
+            });
+        }
+    }
+
+    public static void registerReverseTcpProxyMuxServer(TcpMuxServer muxServer) {
+        for (int i = 0; i < muxServer.maxThreads; i++) {
+            vertx().deployVerticle(new ReverseTcpProxyMuxServerVerticle(muxServer)).onFailure(e -> {
+                log.error("deploy tcp mux server failed", e);
+                System.exit(1);
+            });
+        }
+    }
+
     public static void registerReverseHttpProxy(Http http) {
-        for (int i = 0; i < http.getMaxThreads(); i++) {
+        for (int i = 0; i < http.maxThreads; i++) {
             vertx().deployVerticle(new ReverseHttpProxyVerticle(http)).onFailure(e -> {
                 log.error("deploy reverse http proxy failed", e);
                 System.exit(1);
@@ -48,7 +81,7 @@ public class Utils {
     }
 
     public static void registerReverseTcpProxy(Tcp tcp) {
-        List<String> targets = tcp.getTargets();
+        List<String> targets = tcp.targets;
         List<NetAddress> nodes = new ArrayList<>();
         for (String target : targets) {
             try {
@@ -60,8 +93,8 @@ public class Utils {
             }
         }
         TcpRoundRobinLoadBalancer lb = TcpRoundRobinLoadBalancer.create(nodes);
-        for (int i = 0; i < tcp.getMaxThreads(); i++) {
-            vertx().deployVerticle(new ReverseTcpProxyVerticle(lb, nodes,tcp.getPort())).onFailure(e -> {
+        for (int i = 0; i < tcp.maxThreads; i++) {
+            vertx().deployVerticle(new ReverseTcpProxyVerticle(lb, nodes, tcp)).onFailure(e -> {
                 log.error("deploy reverse tcp proxy failed", e);
                 System.exit(1);
             });
@@ -69,19 +102,19 @@ public class Utils {
     }
 
     public static void registerReverseTcpProxyTunnelClient(TcpTunnelClient tc) {
-        ReverseTcpProxyTunnelClient.create(vertx(), vertx().createNetClient(), tc.getMinDelay(), tc.getMaxDelay(),
-                        tc.getSecret())
-                .backendPort(tc.getBackendPort())
-                .backendHost(tc.getBackendHost())
-                .dataProxyName(tc.getDataProxyName())
-                .dataProxyHost(tc.getDataProxyHost())
-                .dataProxyPort(tc.getDataProxyPort())
-                .connect(tc.getHost(), tc.getPort());
+        ReverseTcpProxyTunnelClient.create(vertx(), vertx().createNetClient(), tc.minDelay, tc.maxDelay,
+                        tc.secret)
+                .backendPort(tc.backendPort)
+                .backendHost(tc.backendHost)
+                .dataProxyName(tc.dataProxyName)
+                .dataProxyHost(tc.dataProxyHost)
+                .dataProxyPort(tc.dataProxyPort)
+                .connect(tc.host, tc.port);
     }
 
     public static void registerReverseTcpProxyTunnelServer(TcpTunnelServer server) {
         final ConcurrentHashMap<NetSocket, ReverseTcpProxyTunnelServer.DataProxyServer> authedSockets = new ConcurrentHashMap<>();
-        for (int i = 0; i < server.getMaxThreads(); i++) {
+        for (int i = 0; i < server.maxThreads; i++) {
             vertx().deployVerticle(new ReverseTcpProxyTunnelServerVerticle(server, authedSockets)).onFailure(e -> {
                 log.error("deplay reverse tcp tunnel server failed", e);
                 System.exit(1);
@@ -216,9 +249,9 @@ public class Utils {
         HttpClient httpClient = vertx().createHttpClient(new HttpClientOptions().setVerifyHost(false).setTrustAll(true));
         try {
             Set<String> domains = new HashSet<>();
-            for (Router router : http.getRouters()) {
+            for (Router router : http.routers) {
                 try {
-                    String targetUrl = router.getTargetUrl();
+                    String targetUrl = router.targetUrl;
                     String host = new URL(targetUrl).getHost();
                     if (IPv4Validator.isIPv4Address(host)) {
                         continue;
