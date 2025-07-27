@@ -3,6 +3,7 @@
 1. HTTP反向代理
 2. TCP反向代理
 3. TCP内网穿透
+4. TCPMux单端口多路复用
 
 下载[Releases · meethigher/http-proxy-boot](https://github.com/meethigher/http-proxy-boot/releases)
 
@@ -17,8 +18,40 @@ java -jar http-proxy-boot.jar
 ```yml
 # 反向代理。支持多种模式，只能启用一种模式
 reverse:
+  # tcpMux-Client端
+  tcpMuxClient:
+    enable: false
+    # muxServer host
+    host: 127.0.0.1
+    # muxServer port
+    port: 44444
+    # 鉴权密钥
+    secret: hello,meethigher
+    # 服务端连接空闲超时，单位毫秒。0表示永不超时
+    serverIdleTimeout: 0
+    # 客户端连接空闲超时，单位毫秒。0表示永不超时
+    clientIdleTimeout: 0
+    # 最大使用线程数
+    maxThreads: 1
+    # 经过muxServer转发出来的服务，格式:`name-localHost:localPort-backendHost:backendPort`
+    services:
+      - ssh20-0.0.0.0:6666-10.0.0.20:22
+      - ssh30-0.0.0.0:6667-10.0.0.30:22
+  # tcpMux-Server端
+  tcpMuxServer:
+    enable: false
+    host: 0.0.0.0
+    port: 44444
+    # 鉴权密钥
+    secret: hello,meethigher
+    # 服务端连接空闲超时，单位毫秒。0表示永不超时
+    serverIdleTimeout: 0
+    # 客户端连接空闲超时，单位毫秒。0表示永不超时
+    clientIdleTimeout: 0
+    # 最大使用的线程数
+    maxThreads: 1
   # tcp内网穿透-Client端
-  tunnelClient:
+  tcpTunnelClient:
     enable: false
     # 失败重连最小延迟，单位毫秒
     minDelay: 1000
@@ -29,65 +62,71 @@ reverse:
     # 控制服务端口
     port: 44444
     # 鉴权密钥
-    secret: 0123456789
+    secret: hello,meethigher
     # 穿透后的服务名称
     dataProxyName: ssh-proxy
     # 穿透后的服务地址
     dataProxyHost: 127.0.0.1
     # 穿透后的服务端口
-    dataProxyPort: 22
+    dataProxyPort: 2222
     # 需要穿透的后端服务地址
-    backendHost: meethigher.top
+    backendHost: 127.0.0.1
     # 需要穿透的后端端口
     backendPort: 22
   # tcp内网穿透-Server端
-  tunnelServer:
+  tcpTunnelServer:
     enable: false
     # 控制服务监听地址
     host: 0.0.0.0
     # 控制服务监听端口
     port: 44444
     # 鉴权密钥
-    secret: 0123456789
+    secret: hello,meethigher
     # 连接类型的延迟判定，在弱网情况下，该参数需要调大。单位毫秒
-    judgeDelay: 2000
+    judgeDelay: 300
     # 心跳间隔。单位毫秒
     heartbeatDelay: 30000
-    # 空闲连接超时端口。单位毫秒。该值要比心跳值要大方可
+    # 空闲连接超时。单位毫秒。0表示永不超时
     idleTimeout: 60000
-    # 最大使用的eventloop线程数
+    # 最大使用的线程数
     maxThreads: 1
   # tcp反向代理
   tcp:
     enable: false
+    host: 0.0.0.0
     port: 8080
-    # 最大使用的eventloop线程数
+    # 服务端连接空闲超时，单位毫秒。0表示永不超时
+    serverIdleTimeout: 0
+    # 客户端连接空闲超时，单位毫秒。0表示永不超时
+    clientIdleTimeout: 0
+    # 最大使用的线程数
     maxThreads: 1
-    # 目标host
-    targetHost: reqres.in
-    # 目标端口
-    targetPort: 443
+    # 目标后端地址，支持多个，采用轮询策略。格式host:port
+    targets:
+      - 127.0.0.1:3306
+      - 127.0.0.1:5432
+      - 127.0.0.1:1521
   # http反向代理
   http:
     enable: false
     port: 8080
     # DNS解析预热。当一台机器有多个DNS服务时，建议将该参数开启，可以预热缓存
     preheatDns: false
-    # 最大使用的eventloop线程数
+    # 最大使用的线程数
     maxThreads: 1
-    # 单个eventloop最大可以处理的http1请求
+    # http1连接池最大容量
     http1MaxSize: 6000
-    # 单个eventloop最大可以处理的http2请求
+    # http2连接池最大容量
     http2MaxSize: 2000
     # 代理路由
     # 路由配置越靠后，优先级越高
     routers:
       - name: route1
-        # 代理路径。支持单路径匹配（如 /test ）、多路径匹配（如 /* ）
+        # 代理路径。支持单路径匹配（如 /test ）、多级路径匹配（如 /* ）
         sourceUrl: /*
         # 代理目标地址
         targetUrl: https://reqres.in
-        # 转发客户端请求IP与协议
+        # 通过XFF转发客户端请求IP、XFP转发请求协议。覆盖原请求头
         forwardIp: false
         # 保留响应头的Cookie与SetCookie
         preserveCookies: true
@@ -100,7 +139,7 @@ reverse:
         # 记录http日志，日志格式由logFormat参数决定
         logEnable: true
         # 日志格式，当logEnable开启时生效。用花括号引起来，表示关键字。关键字可选，格式支持自定义
-        logFormat: "{name} -- {serverHttpVersion} -- {clientHttpVersion} -- {method} -- {userAgent} -- {serverRemoteAddr} -- {clientLocalAddr} -- {sourceUri} -- {proxyUrl} -- {statusCode} -- consumed {consumedMills} ms"
+        logFormat: "{name} -- {serverHttpVersion} -- {clientHttpVersion} -- {method} -- {userAgent} -- {serverRemoteAddr} -- {serverLocalAddr} -- {clientLocalAddr} -- {clientRemoteAddr} -- {sourceUri} -- {proxyUrl} -- {statusCode} -- consumed {consumedMills} ms"
         # 由代理服务管理跨域。当该参数为true时，是否允许跨域由allowCors决定
         corsControl: false
         # 是否允许跨域。当corsControl开启时生效
