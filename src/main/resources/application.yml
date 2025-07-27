@@ -1,9 +1,13 @@
-# 反向代理。支持多种模式，只能启用一种模式
 reverse:
   # tcp反向代理
   tcp:
     enable: true
+    host: 0.0.0.0
     port: 8080
+    # 服务端连接空闲超时，单位毫秒。0表示永不超时
+    serverIdleTimeout: 0
+    # 客户端连接空闲超时，单位毫秒。0表示永不超时
+    clientIdleTimeout: 0
     # 最大使用的线程数
     maxThreads: 1
     # 目标后端地址，支持多个，采用轮询策略。格式host:port

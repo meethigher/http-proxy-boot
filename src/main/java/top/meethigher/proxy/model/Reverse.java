@@ -1,14 +1,11 @@
 package top.meethigher.proxy.model;
 
 
-import lombok.Data;
-
-import java.io.Serializable;
-
-@Data
-public class Reverse implements Serializable {
-    private TcpTunnelClient tcpTunnelClient = new TcpTunnelClient();
-    private TcpTunnelServer tcpTunnelServer = new TcpTunnelServer();
-    private Tcp tcp = new Tcp();
-    private Http http = new Http();
+public class Reverse {
+    public TcpMuxClient tcpMuxClient = new TcpMuxClient();
+    public TcpMuxServer tcpMuxServer = new TcpMuxServer();
+    public TcpTunnelClient tcpTunnelClient = new TcpTunnelClient();
+    public TcpTunnelServer tcpTunnelServer = new TcpTunnelServer();
+    public Tcp tcp = new Tcp();
+    public Http http = new Http();
 }

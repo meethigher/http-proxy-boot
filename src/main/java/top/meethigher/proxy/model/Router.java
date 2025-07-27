@@ -1,23 +1,18 @@
 package top.meethigher.proxy.model;
 
-import lombok.Data;
+public class Router {
 
-import java.io.Serializable;
-
-@Data
-public class Router  implements Serializable {
-
-    private String name = "proxyRoute";
-    private String sourceUrl = "/*";
-    private String targetUrl = "http://127.0.0.1:8080";
-    private Boolean forwardIp = false;
-    private Boolean preserveCookies = true;
-    private Boolean preserveHost = false;
-    private Boolean followRedirects = true;
-    private Boolean httpKeepAlive = true;
-    private Boolean logEnable = true;
-    private String logFormat = "{name} -- {serverHttpVersion} -- {clientHttpVersion} -- {method} -- {userAgent} -- {serverRemoteAddr} -- {serverLocalAddr} -- {clientLocalAddr} -- {clientRemoteAddr} -- {sourceUri} -- {proxyUrl} -- {statusCode} -- consumed {consumedMills} ms";
-    private Boolean corsControl = false;
-    private Boolean corsAllow = true;
+    public String name;
+    public String sourceUrl;
+    public String targetUrl;
+    public Boolean forwardIp;
+    public Boolean preserveCookies;
+    public Boolean preserveHost;
+    public Boolean followRedirects;
+    public Boolean httpKeepAlive;
+    public Boolean logEnable;
+    public String logFormat;
+    public Boolean corsControl;
+    public Boolean corsAllow;
 
 }

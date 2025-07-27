@@ -26,13 +26,13 @@ public class ReverseTcpProxyTunnelServerVerticle extends AbstractVerticle {
                         vertx,
                         vertx.createNetServer(new NetServerOptions()
                                 .setIdleTimeoutUnit(TimeUnit.MILLISECONDS)
-                                .setIdleTimeout(ts.getIdleTimeout())),
-                        ts.getSecret(),
+                                .setIdleTimeout(ts.idleTimeout)),
+                        ts.secret,
                         authedSockets)
-                .heartbeatDelay(ts.getHeartbeatDelay())
-                .judgeDelay(ts.getJudgeDelay())
-                .host(ts.getHost())
-                .port(ts.getPort())
+                .heartbeatDelay(ts.heartbeatDelay)
+                .judgeDelay(ts.judgeDelay)
+                .host(ts.host)
+                .port(ts.port)
                 .start();
 
     }

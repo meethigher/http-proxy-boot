@@ -25,29 +25,37 @@ public class App {
         System.setProperty("PID", pid());
         loadLogConfig();
         Reverse reverse = loadApplicationConfig();
-        Tcp tcp = reverse.getTcp();
-        Http http = reverse.getHttp();
-        TcpTunnelClient tc = reverse.getTcpTunnelClient();
-        TcpTunnelServer ts = reverse.getTcpTunnelServer();
+        Tcp tcp = reverse.tcp;
+        Http http = reverse.http;
+        TcpTunnelClient tc = reverse.tcpTunnelClient;
+        TcpTunnelServer ts = reverse.tcpTunnelServer;
+        TcpMuxClient mc = reverse.tcpMuxClient;
+        TcpMuxServer ms = reverse.tcpMuxServer;
         final Logger log = LoggerFactory.getLogger(App.class);
-        if (tcp.getEnable()) {
+        if (tcp.enable) {
             log.info("current mode: ReverseTcpProxy");
             registerReverseTcpProxy(tcp);
-        } else if (http.getEnable()) {
+        } else if (http.enable) {
             log.info("current mode: ReverseHttpProxy");
-            if (http.getPreheatDns()) {
+            if (http.preheatDns) {
                 vertx().executeBlocking((Callable<Void>) () -> {
                     preheatDns(http);
                     return null;
                 });
             }
             registerReverseHttpProxy(http);
-        } else if (tc.getEnable()) {
+        } else if (tc.enable) {
             log.info("current mode: ReverseTcpProxyTunnelClient");
             registerReverseTcpProxyTunnelClient(tc);
-        } else if (ts.getEnable()) {
+        } else if (ts.enable) {
             log.info("current mode: ReverseTcpProxyTunnelServer");
             registerReverseTcpProxyTunnelServer(ts);
+        } else if (mc.enable) {
+            log.info("current mode: ReverseTcpProxyMuxClient");
+            registerReverseTcpProxyMuxClient(mc);
+        } else if (ms.enable) {
+            log.info("current mode: ReverseTcpProxyMuxServer");
+            registerReverseTcpProxyMuxServer(ms);
         } else {
             throw new IllegalArgumentException("you need to enable one model");
         }

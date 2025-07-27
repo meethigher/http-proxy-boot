@@ -35,8 +35,8 @@ public class ReverseHttpProxyVerticle extends AbstractVerticle {
                     add(HttpVersion.HTTP_2);
                 }});
         PoolOptions poolOptions = new PoolOptions()
-                .setHttp1MaxSize(http.getHttp1MaxSize())
-                .setHttp2MaxSize(http.getHttp2MaxSize());
+                .setHttp1MaxSize(http.http1MaxSize)
+                .setHttp2MaxSize(http.http2MaxSize);
         HttpServerOptions httpServerOptions = new HttpServerOptions()
                 // 服务端支持与客户端进行协商，支持通过alpn用于协商客户端和服务端使用http1.1还是http2
                 // 开启h2c，使其支持http2，默认情况下http2只在开启了tls使用。如果不开启tls还想使用http2，那么需要开启h2c
@@ -47,20 +47,20 @@ public class ReverseHttpProxyVerticle extends AbstractVerticle {
         ReverseHttpProxy httpProxy = ReverseHttpProxy.create(router,
                         vertx.createHttpServer(httpServerOptions),
                         vertx.createHttpClient(httpClientOptions, poolOptions))
-                .port(http.getPort());
-        for (int i = 0, order = Integer.MAX_VALUE; i < http.getRouters().size(); i++, order--) {
-            top.meethigher.proxy.model.Router r = http.getRouters().get(i);
+                .port(http.port);
+        for (int i = 0, order = Integer.MAX_VALUE; i < http.routers.size(); i++, order--) {
+            top.meethigher.proxy.model.Router r = http.routers.get(i);
             ProxyRoute proxyRoute = new ProxyRoute()
-                    .setName(r.getName())
-                    .setSourceUrl(r.getSourceUrl())
-                    .setTargetUrl(r.getTargetUrl())
-                    .setForwardIp(r.getForwardIp())
-                    .setPreserveCookies(r.getPreserveCookies())
-                    .setPreserveHost(r.getPreserveHost())
-                    .setFollowRedirects(r.getFollowRedirects())
-                    .setHttpKeepAlive(r.getHttpKeepAlive())
-                    .setLog(new ProxyRoute.Log().setEnable(r.getLogEnable()).setLogFormat(r.getLogFormat()))
-                    .setCorsControl(new ProxyRoute.CorsControl().setEnable(r.getCorsControl()).setAllowCors(r.getCorsAllow()));
+                    .setName(r.name)
+                    .setSourceUrl(r.sourceUrl)
+                    .setTargetUrl(r.targetUrl)
+                    .setForwardIp(r.forwardIp)
+                    .setPreserveCookies(r.preserveCookies)
+                    .setPreserveHost(r.preserveHost)
+                    .setFollowRedirects(r.followRedirects)
+                    .setHttpKeepAlive(r.httpKeepAlive)
+                    .setLog(new ProxyRoute.Log().setEnable(r.logEnable).setLogFormat(r.logFormat))
+                    .setCorsControl(new ProxyRoute.CorsControl().setEnable(r.corsControl).setAllowCors(r.corsAllow));
             httpProxy.addRoute(proxyRoute, order, false);
         }
         httpProxy.start();

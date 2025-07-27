@@ -1,5 +1,37 @@
 # 反向代理。支持多种模式，只能启用一种模式
 reverse:
+  # tcpMux-Client端
+  tcpMuxClient:
+    enable: false
+    # muxServer host
+    host: 127.0.0.1
+    # muxServer port
+    port: 44444
+    # 鉴权密钥
+    secret: hello,meethigher
+    # 服务端连接空闲超时，单位毫秒。0表示永不超时
+    serverIdleTimeout: 0
+    # 客户端连接空闲超时，单位毫秒。0表示永不超时
+    clientIdleTimeout: 0
+    # 最大使用线程数
+    maxThreads: 1
+    # 经过muxServer转发出来的服务，格式:`name-localHost:localPort-backendHost:backendPort`
+    services:
+      - ssh20-0.0.0.0:6666-10.0.0.20:22
+      - ssh30-0.0.0.0:6667-10.0.0.30:22
+  # tcpMux-Server端
+  tcpMuxServer:
+    enable: false
+    host: 0.0.0.0
+    port: 44444
+    # 鉴权密钥
+    secret: hello,meethigher
+    # 服务端连接空闲超时，单位毫秒。0表示永不超时
+    serverIdleTimeout: 0
+    # 客户端连接空闲超时，单位毫秒。0表示永不超时
+    clientIdleTimeout: 0
+    # 最大使用的线程数
+    maxThreads: 1
   # tcp内网穿透-Client端
   tcpTunnelClient:
     enable: false
@@ -12,15 +44,15 @@ reverse:
     # 控制服务端口
     port: 44444
     # 鉴权密钥
-    secret: 0123456789
+    secret: hello,meethigher
     # 穿透后的服务名称
     dataProxyName: ssh-proxy
     # 穿透后的服务地址
     dataProxyHost: 127.0.0.1
     # 穿透后的服务端口
-    dataProxyPort: 22
+    dataProxyPort: 2222
     # 需要穿透的后端服务地址
-    backendHost: meethigher.top
+    backendHost: 127.0.0.1
     # 需要穿透的后端端口
     backendPort: 22
   # tcp内网穿透-Server端
@@ -31,19 +63,24 @@ reverse:
     # 控制服务监听端口
     port: 44444
     # 鉴权密钥
-    secret: 0123456789
+    secret: hello,meethigher
     # 连接类型的延迟判定，在弱网情况下，该参数需要调大。单位毫秒
-    judgeDelay: 2000
+    judgeDelay: 300
     # 心跳间隔。单位毫秒
     heartbeatDelay: 30000
-    # 空闲连接超时端口。单位毫秒。该值要比心跳值要大方可
+    # 空闲连接超时。单位毫秒。0表示永不超时
     idleTimeout: 60000
     # 最大使用的线程数
     maxThreads: 1
   # tcp反向代理
   tcp:
     enable: false
+    host: 0.0.0.0
     port: 8080
+    # 服务端连接空闲超时，单位毫秒。0表示永不超时
+    serverIdleTimeout: 0
+    # 客户端连接空闲超时，单位毫秒。0表示永不超时
+    clientIdleTimeout: 0
     # 最大使用的线程数
     maxThreads: 1
     # 目标后端地址，支持多个，采用轮询策略。格式host:port
