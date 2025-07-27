@@ -1,12 +1,16 @@
 .idea/
 target/
+logs/
+out/
+application.yml
+application-full.yml
+logback.xml
+**/MANIFEST.MF
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 
 ### IntelliJ IDEA ###
-logs/
-.idea/
 *.iws
 *.iml
 *.ipr
