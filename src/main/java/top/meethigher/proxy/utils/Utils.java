@@ -11,8 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 import top.meethigher.proxy.NetAddress;
+import top.meethigher.proxy.RoundRobinLoadBalancer;
 import top.meethigher.proxy.model.*;
-import top.meethigher.proxy.tcp.TcpRoundRobinLoadBalancer;
 import top.meethigher.proxy.tcp.mux.model.MuxNetAddress;
 import top.meethigher.proxy.tcp.tunnel.ReverseTcpProxyTunnelServer;
 
@@ -79,6 +79,27 @@ public class Utils {
         }
     }
 
+    public static void registerReverseUdpProxy(Udp udp) {
+        List<String> targets = udp.targets;
+        List<NetAddress> nodes = new ArrayList<>();
+        for (String target : targets) {
+            try {
+                String[] addr = target.split(":");
+                nodes.add(new NetAddress(addr[0], Integer.parseInt(addr[1])));
+            } catch (Exception e) {
+                log.error("udp targes format is incorrect. The correct format is host:port.");
+                System.exit(1);
+            }
+        }
+        RoundRobinLoadBalancer lb = RoundRobinLoadBalancer.create(nodes);
+        for (int i = 0; i < udp.maxThreads; i++) {
+            vertx().deployVerticle(new ReverseUdpProxyVerticle(lb, udp)).onFailure(e -> {
+                log.error("deploy reverse udp proxy failed", e);
+                System.exit(1);
+            });
+        }
+    }
+
     public static void registerReverseTcpProxy(Tcp tcp) {
         List<String> targets = tcp.targets;
         List<NetAddress> nodes = new ArrayList<>();
@@ -91,9 +112,9 @@ public class Utils {
                 System.exit(1);
             }
         }
-        TcpRoundRobinLoadBalancer lb = TcpRoundRobinLoadBalancer.create(nodes);
+        RoundRobinLoadBalancer lb = RoundRobinLoadBalancer.create(nodes);
         for (int i = 0; i < tcp.maxThreads; i++) {
-            vertx().deployVerticle(new ReverseTcpProxyVerticle(lb, nodes, tcp)).onFailure(e -> {
+            vertx().deployVerticle(new ReverseTcpProxyVerticle(lb, tcp)).onFailure(e -> {
                 log.error("deploy reverse tcp proxy failed", e);
                 System.exit(1);
             });

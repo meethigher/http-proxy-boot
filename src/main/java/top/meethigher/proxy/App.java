@@ -25,6 +25,7 @@ public class App {
         loadLogConfig();
         Reverse reverse = loadApplicationConfig();
         Tcp tcp = reverse.tcp;
+        Udp udp = reverse.udp;
         Http http = reverse.http;
         TcpTunnelClient tc = reverse.tcpTunnelClient;
         TcpTunnelServer ts = reverse.tcpTunnelServer;
@@ -34,6 +35,9 @@ public class App {
         if (tcp.enable) {
             log.info("current mode: ReverseTcpProxy");
             registerReverseTcpProxy(tcp);
+        } else if (udp.enable) {
+            log.info("current mode: ReverseUdpProxy");
+            registerReverseUdpProxy(udp);
         } else if (http.enable) {
             log.info("current mode: ReverseHttpProxy");
             registerReverseHttpProxy(http);

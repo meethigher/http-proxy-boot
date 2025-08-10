@@ -7,5 +7,6 @@ public class Reverse {
     public TcpTunnelClient tcpTunnelClient = new TcpTunnelClient();
     public TcpTunnelServer tcpTunnelServer = new TcpTunnelServer();
     public Tcp tcp = new Tcp();
+    public Udp udp = new Udp();
     public Http http = new Http();
 }
